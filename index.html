@@ -382,12 +382,12 @@
     </div>
     <div class="sync-row">
       <div class="sync-head">
-        <span class="sync-title">🔄 Синхронизация устройств</span>
-        <span class="sync-badge" id="syncBadge">выключена</span>
+        <span class="sync-title">🔄 Синхронизация</span>
+        <span class="sync-badge" id="syncBadge">подключение…</span>
       </div>
-      <label class="sync-label" for="syncCode">Код синхронизации — одинаковый на телефоне и компьютере</label>
-      <input type="text" id="syncCode" placeholder="например: nasha-semya" autocomplete="off" autocapitalize="none" spellcheck="false">
-      <p class="hint">Придумай кодовое слово и введи одно и то же на всех устройствах — правки (имена, фото, смены) будут синхронизироваться автоматически. Этим же кодом данные шифруются, в облаке они недоступны посторонним. Не потеряй код: без него данные не открыть.</p>
+      <p class="hint">График общий для всех устройств — открываешь на любом и видишь одно и то же. Правки сохраняются автоматически.</p>
+      <button class="btn" id="forcePush" style="width:100%; margin-top:11px; background:var(--glass); color:var(--ink)">⬆ Сделать данные этого устройства главными</button>
+      <p class="hint">Нажми это на устройстве, где данные <b>правильные</b> (нужные фото, имена, смены), если на других устройствах данные разошлись — оно обновит облако и все остальные подтянут его.</p>
     </div>
     <details class="share-details">
       <summary>Другой способ — разовая ссылка (без облака)</summary>
@@ -646,17 +646,14 @@ let photoTargetIdx = null;
 function openSettings(){
   draft = JSON.parse(JSON.stringify(state.people));
   renderEditor();
-  document.getElementById('syncCode').value = localStorage.getItem('rhythm-sync') || '';
   updateSyncBadge();
   sheetBack.classList.add('open');
 }
 function closeSettings(){ sheetBack.classList.remove('open'); }
 function updateSyncBadge(){
-  const code = localStorage.getItem('rhythm-sync') || '';
   const b = document.getElementById('syncBadge'); if(!b) return;
-  if(code && window.CloudSync && window.CloudSync.ready()){ b.textContent='включена'; b.classList.add('on'); }
-  else if(code){ b.textContent='подключение…'; b.classList.remove('on'); }
-  else { b.textContent='выключена'; b.classList.remove('on'); }
+  if(window.CloudSync && window.CloudSync.ready()){ b.textContent='включена'; b.classList.add('on'); }
+  else { b.textContent='подключение…'; b.classList.remove('on'); }
 }
 
 function renderEditor(){
@@ -763,19 +760,17 @@ document.getElementById('saveBtn').onclick = ()=>{
     .filter(p=>p.work+p.off>0);
   if(!clean.length){ toast('Добавьте хотя бы одного человека'); return; }
   state.people = clean; saveState(); render();
-
-  // синхронизация: код изменился → перезапуск, иначе — отправка в облако
-  const code = (document.getElementById('syncCode').value||'').trim();
-  const prev = localStorage.getItem('rhythm-sync')||'';
-  if(code !== prev){
-    if(code) localStorage.setItem('rhythm-sync', code); else localStorage.removeItem('rhythm-sync');
-    closeSettings();
-    toast(code ? 'Синхронизация включается…' : 'Синхронизация выключена');
-    setTimeout(()=>location.reload(), 700);
-    return;
-  }
+  // отправляем изменения в общее облако
   if(window.CloudSync && window.CloudSync.ready()) window.CloudSync.push(state).catch(()=>{});
   closeSettings();
+};
+
+/* «Сделать данные этого устройства главными» — принудительная заливка в облако */
+document.getElementById('forcePush').onclick = ()=>{
+  if(!window.CloudSync){ toast('Синхронизация ещё не готова'); return; }
+  window.CloudSync.forcePush(state)
+    .then(()=>toast('Данные этого устройства загружены в облако'))
+    .catch(()=>toast('Не удалось загрузить'));
 };
 
 /* поделиться графиком (без фото) */
@@ -807,13 +802,12 @@ function applyRemote(remote){
   firstRemote = false;
 }
 function initCloud(){
-  const code = localStorage.getItem('rhythm-sync');
-  if(!code || !window.CloudSync) return;
-  window.CloudSync.connect(code, applyRemote, ()=>{
-    // облако пустое — заливаем локальные данные (с фото)
+  if(!window.CloudSync) return;
+  window.CloudSync.start(applyRemote, ()=>{
+    // облако пустое — заливаем данные этого устройства
     window.CloudSync.push(state).catch(()=>{});
   }).then(()=>updateSyncBadge())
-    .catch(err=>{ console.warn('sync error', err); toast('Не удалось подключить синхронизацию'); });
+    .catch(err=>{ console.warn('sync error', err); });
 }
 if(window.CloudSync) initCloud();
 else window.addEventListener('cloudsync-loaded', initCloud);
@@ -837,43 +831,27 @@ const firebaseConfig = {
   appId: "1:593614303579:web:db3c4021632c7520deaa7e"
 };
 
-let app, auth, db, authPromise, room=null, key=null, isReady=false, applying=false;
-const encT = new TextEncoder(), decT = new TextDecoder();
-const SALT = encT.encode("grafik-smen/v1");
+// Единое общее состояние для всех устройств — путь rooms/main, без кода.
+const STATE_PATH = 'rooms/main';
+let app, auth, db, authPromise, isReady=false, applying=false;
 
 async function ensureAuth(){
   if(!app){ app = initializeApp(firebaseConfig); auth = getAuth(app); db = getDatabase(app); }
   if(!authPromise) authPromise = signInAnonymously(auth).catch(e=>console.warn('anon auth:', e && e.code));
   await authPromise;
 }
-async function deriveKey(code){
-  const base = await crypto.subtle.importKey('raw', encT.encode(code), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey({name:'PBKDF2', salt:SALT, iterations:100000, hash:'SHA-256'},
-    base, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
-}
-async function roomFor(code){
-  const h = await crypto.subtle.digest('SHA-256', encT.encode('room:'+code));
-  return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,40);
-}
-const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
-const unb64 = s => Uint8Array.from(atob(s), c=>c.charCodeAt(0));
 
 window.CloudSync = {
   ready(){ return isReady; },
-  async connect(code, onData, onEmpty){
+  async start(onData, onEmpty){
     await ensureAuth();
-    key = await deriveKey(code);
-    room = await roomFor(code);
     isReady = true;
     let seeded = false;
-    onValue(ref(db, 'rooms/'+room), async snap=>{
+    onValue(ref(db, STATE_PATH), snap=>{
       const val = snap.val();
-      if(val && val.ct){
-        try{
-          const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:unb64(val.iv)}, key, unb64(val.ct));
-          applying = true; onData(JSON.parse(decT.decode(pt))); applying = false;
-          seeded = true;
-        }catch(e){ console.warn('decrypt failed', e); }
+      if(val && Array.isArray(val.people) && val.people.length){
+        applying = true; try{ onData(val); } finally { applying = false; }
+        seeded = true;
       } else if(!seeded){
         seeded = true;
         if(onEmpty) onEmpty();
@@ -882,10 +860,12 @@ window.CloudSync = {
     return true;
   },
   async push(state){
-    if(!isReady || !key || applying) return;
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, encT.encode(JSON.stringify(state)));
-    await set(ref(db, 'rooms/'+room), { v:1, iv:b64(iv), ct:b64(ct), t:Date.now() });
+    if(!isReady || applying) return;
+    await set(ref(db, STATE_PATH), state);
+  },
+  async forcePush(state){
+    await ensureAuth(); isReady = true;
+    await set(ref(db, STATE_PATH), state);
   }
 };
 window.dispatchEvent(new Event('cloudsync-loaded'));
