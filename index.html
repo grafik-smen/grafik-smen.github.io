@@ -259,8 +259,12 @@
   .head .grow{flex:1; min-width:0}
   .head input[type=text]{width:100%}
   .rm-photo{background:none; border:none; color:var(--p2); font-weight:700; font-size:12px; cursor:pointer; padding:2px 0; margin-top:3px}
-  .fields{display:flex; gap:10px; flex-wrap:wrap}
-  .field{display:flex; flex-direction:column; gap:5px; flex:1 1 140px; min-width:130px}
+  .fields{display:flex; gap:10px; flex-direction:column}
+  .field{display:flex; flex-direction:column; gap:5px; min-width:0}
+  @media (min-width:480px){
+    .fields{flex-direction:row}
+    .fields .field{flex:1 1 0}
+  }
   .field > label{font-size:11.5px; font-weight:700; color:var(--ink-dim); letter-spacing:.2px}
   input[type=text],input[type=date],select{
     width:100%; border:1px solid var(--stroke-2); background:color-mix(in oklab, var(--ink) 5%, transparent);
