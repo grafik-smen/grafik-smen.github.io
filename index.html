@@ -195,14 +195,16 @@
   .cell .num{font-family:var(--font-display); font-size:14px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums}
   .cell .tint{position:absolute; inset:0; z-index:0}
   .cell > *{position:relative; z-index:1}
-  /* Дорожки статуса: одна на человека. Залито = рабочий день, контур = выходной */
-  .lanes{margin-top:auto; display:flex; flex-direction:column; gap:3px}
-  .lane{height:15px; border-radius:99px; display:flex; align-items:center; gap:4px; padding:0 3px}
-  .lane.on{background:color-mix(in oklab, var(--c) 92%, transparent); box-shadow:0 1px 5px color-mix(in oklab, var(--c) 40%, transparent)}
-  .lane.off{background:transparent; box-shadow:inset 0 0 0 1.6px color-mix(in oklab, var(--c) 32%, transparent); opacity:.6}
-  .lane .la{width:11px; height:11px; border-radius:50%; overflow:hidden; flex:0 0 auto; display:grid; place-items:center; font-size:7px; font-weight:800; color:#fff; background:color-mix(in oklab, var(--c) 55%, #000)}
-  .lane .la img{width:100%; height:100%; object-fit:cover; display:block}
-  .lane.on .la{box-shadow:0 0 0 1.4px rgba(255,255,255,.6)}
+  /* Рабочий день: крупные аватары ТОЛЬКО работающих, каждый в кольце своего цвета.
+     У кого выходной — в дне не показывается. */
+  .workers{margin-top:auto; display:flex; align-items:center; justify-content:center; gap:3px; min-height:27px}
+  .w-ava{width:27px; height:27px; border-radius:50%; overflow:hidden; flex:0 0 auto; display:grid; place-items:center;
+    font-size:12px; font-weight:800; color:#fff; font-family:var(--font-display);
+    background:linear-gradient(140deg, var(--c), color-mix(in oklab, var(--c) 55%, #000));
+    box-shadow:0 0 0 2.5px var(--c), 0 2px 7px rgba(0,0,0,.4)}
+  .w-ava img{width:100%; height:100%; object-fit:cover; display:block}
+  .workers.multi .w-ava{width:24px; height:24px}
+  .workers.multi .w-ava:not(:first-child){margin-left:-7px}
   /* Общий выходной — оба свободны */
   .cell.free{background:color-mix(in oklab, var(--free) 16%, transparent); border-color:color-mix(in oklab, var(--free) 45%, transparent)}
   .free-lane{margin-top:auto; height:15px; border-radius:99px; display:flex; align-items:center; justify-content:center;
@@ -529,12 +531,12 @@ function renderCalendar(){
       cell.classList.add('free');
       bottom = `<div class="free-lane">🌿</div>`;
     } else {
-      const lanes = state.people.map(p=>{
-        const on = isWorking(p,d);
+      // показываем ТОЛЬКО работающих; у кого выходной — в дне не отображается
+      const avatars = workers.map(p=>{
         const face = p.photo ? `<img src="${p.photo}" alt="">` : initial(p.name);
-        return `<div class="lane ${on?'on':'off'}" style="--c:${p.color}"><span class="la">${face}</span></div>`;
+        return `<div class="w-ava" style="--c:${p.color}">${face}</div>`;
       }).join('');
-      bottom = `<div class="lanes">${lanes}</div>`;
+      bottom = `<div class="workers ${workers.length>1?'multi':''}">${avatars}</div>`;
     }
 
     cell.innerHTML = `
@@ -549,8 +551,7 @@ function renderCalendar(){
 /* Легенда календаря: цвет↔человек + смысл контура и зелёного */
 function renderLegend(){
   const el = document.getElementById('calLegend');
-  let html = state.people.map(p=>`<span class="lg"><i style="background:${p.color}"></i>${escapeHtml(p.name||'—')}</span>`).join('');
-  html += `<span class="lg"><i class="ghost"></i>выходной</span>`;
+  let html = state.people.map(p=>`<span class="lg"><i style="background:${p.color}"></i>${escapeHtml(p.name||'—')} работает</span>`).join('');
   if(state.people.length>=2) html += `<span class="lg"><i style="background:var(--free)"></i>оба свободны</span>`;
   el.innerHTML = html;
 }
