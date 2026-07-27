@@ -325,6 +325,19 @@
   }
   .toast.show{opacity:1; transform:translate(-50%,0)}
 
+  /* Оверлей загрузки — вместо дефолтного экрана на новом устройстве */
+  .load-overlay{position:fixed; inset:0; z-index:45; display:none; flex-direction:column; gap:16px;
+    align-items:center; justify-content:center; background:var(--bg-0); transition:opacity .35s ease}
+  .load-overlay.show{display:flex}
+  .load-overlay.hide{opacity:0; pointer-events:none}
+  .load-overlay .mark{width:52px; height:52px; border-radius:16px; display:grid; place-items:center;
+    background:linear-gradient(135deg, var(--p1), var(--p2)); box-shadow:var(--shadow-lg)}
+  .load-overlay .mark span{width:22px; height:22px; display:grid; grid-template-columns:1fr 1fr; gap:3px}
+  .load-overlay .mark i{background:rgba(255,255,255,.92); border-radius:3px; animation:blink 1.2s ease-in-out infinite}
+  .load-overlay .mark i:nth-child(2){animation-delay:.15s} .load-overlay .mark i:nth-child(3){animation-delay:.45s} .load-overlay .mark i:nth-child(4){animation-delay:.3s}
+  @keyframes blink{0%,100%{opacity:.35} 50%{opacity:1}}
+  .load-overlay .lt{font-family:var(--font-display); font-weight:800; font-size:15px; color:var(--ink-dim)}
+
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
   }
@@ -332,6 +345,10 @@
 </head>
 <body>
 <div class="aurora"></div>
+<div class="load-overlay" id="loadOverlay">
+  <div class="mark"><span><i></i><i></i><i></i><i></i></span></div>
+  <div class="lt">Загружаем график…</div>
+</div>
 <div class="wrap">
   <header class="top">
     <div class="brand">
@@ -467,6 +484,7 @@ function loadState(){
 function safeLocal(){ try{ const r=localStorage.getItem('rhythm-cal'); const s=r&&JSON.parse(r); return s?.people?.length? s : null; }catch(e){ return null; } }
 function saveState(){ try{ localStorage.setItem('rhythm-cal', JSON.stringify(state)); }catch(e){ toast('Не удалось сохранить (нет места)'); } }
 
+const hadLocal = !!safeLocal();   // были ли данные на этом устройстве раньше
 let state = loadState();
 let viewY, viewM;
 (()=>{ const n=new Date(); viewY=n.getFullYear(); viewM=n.getMonth(); })();
@@ -787,30 +805,43 @@ function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<'
 let toastT;
 function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1900); }
 
-render();
+/* ───────── Старт и облачная синхронизация ───────── */
+let booted = false;
+const loadOverlay = document.getElementById('loadOverlay');
+function boot(){
+  if(booted) return; booted = true;
+  render();
+  loadOverlay.classList.add('hide');
+  setTimeout(()=>loadOverlay.classList.remove('show','hide'), 400);
+}
+// Есть локальные данные → показываем мгновенно. Нет (новое устройство) → ждём облако, без дефолтного экрана.
+if(hadLocal){ boot(); }
+else { loadOverlay.classList.add('show'); }
 
-/* ───────── Облачная синхронизация ───────── */
 let firstRemote = true;
 function applyRemote(remote){
   if(!remote || !Array.isArray(remote.people) || !remote.people.length) return;
   const incoming = JSON.stringify(remote);
-  if(incoming === JSON.stringify(state)){ firstRemote = false; return; } // эхо/без изменений
+  if(incoming === JSON.stringify(state) && booted){ firstRemote = false; return; } // эхо/без изменений
   state = remote;
   try{ localStorage.setItem('rhythm-cal', incoming); }catch(e){}
-  render();
-  if(!firstRemote) toast('Обновлено с другого устройства');
+  if(!booted){ boot(); }                              // первый холодный старт — рисуем сразу настоящие данные
+  else { render(); if(!firstRemote) toast('Обновлено с другого устройства'); }
   firstRemote = false;
 }
 function initCloud(){
   if(!window.CloudSync) return;
   window.CloudSync.start(applyRemote, ()=>{
-    // облако пустое — заливаем данные этого устройства
+    // облако пустое — заливаем данные этого устройства и показываем их
+    if(!booted) boot();
     window.CloudSync.push(state).catch(()=>{});
   }).then(()=>updateSyncBadge())
-    .catch(err=>{ console.warn('sync error', err); });
+    .catch(err=>{ console.warn('sync error', err); if(!booted) boot(); });
 }
 if(window.CloudSync) initCloud();
 else window.addEventListener('cloudsync-loaded', initCloud);
+// Подстраховка: если облако/сеть не ответили — показываем что есть, не зависаем на загрузке
+setTimeout(()=>{ if(!booted) boot(); }, 7000);
 
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
 </script>
