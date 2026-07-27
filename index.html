@@ -300,9 +300,22 @@
   .btn.ghost{background:var(--glass); color:var(--ink)}
   .btn.primary{background:linear-gradient(135deg, var(--p1), color-mix(in oklab, var(--p1) 60%, var(--p2))); color:#fff; border-color:transparent; box-shadow:var(--shadow)}
   .btn.primary:hover{filter:brightness(1.06)}
-  .share-row{margin-top:14px; padding-top:14px; border-top:1px solid var(--stroke)}
   .share-row .btn{width:100%; background:var(--glass); color:var(--ink)}
   .hint{font-size:12px; color:var(--ink-faint); margin-top:9px; line-height:1.5}
+  /* Синхронизация */
+  .sync-row{margin-top:16px; padding-top:16px; border-top:1px solid var(--stroke)}
+  .sync-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:11px}
+  .sync-title{font-family:var(--font-display); font-weight:800; font-size:15px}
+  .sync-badge{font-size:11px; font-weight:800; padding:4px 10px; border-radius:99px; letter-spacing:.3px;
+    background:color-mix(in oklab, var(--ink-faint) 26%, transparent); color:var(--ink-dim)}
+  .sync-badge.on{background:color-mix(in oklab, var(--free) 22%, transparent); color:var(--free)}
+  .sync-label{display:block; font-size:11.5px; font-weight:700; color:var(--ink-dim); margin-bottom:7px}
+  .share-details{margin-top:14px}
+  .share-details summary{cursor:pointer; font-size:13px; color:var(--ink-dim); font-weight:600; padding:6px 0; list-style:none}
+  .share-details summary::-webkit-details-marker{display:none}
+  .share-details summary::before{content:"▸ "}
+  .share-details[open] summary::before{content:"▾ "}
+  .share-details .share-row{margin-top:8px}
 
   .toast{
     position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px);
@@ -367,10 +380,22 @@
       <button class="btn ghost" id="cancelBtn">Отмена</button>
       <button class="btn primary" id="saveBtn">Сохранить</button>
     </div>
-    <div class="share-row">
-      <button class="btn" id="shareBtn">🔗 Скопировать ссылку с графиком</button>
-      <p class="hint">Откройте ссылку на другом устройстве или сохраните в закладки — там будет тот же график. Фотографии в ссылку не входят (слишком тяжёлые) — их можно загрузить на каждом устройстве отдельно.</p>
+    <div class="sync-row">
+      <div class="sync-head">
+        <span class="sync-title">🔄 Синхронизация устройств</span>
+        <span class="sync-badge" id="syncBadge">выключена</span>
+      </div>
+      <label class="sync-label" for="syncCode">Код синхронизации — одинаковый на телефоне и компьютере</label>
+      <input type="text" id="syncCode" placeholder="например: nasha-semya" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <p class="hint">Придумай кодовое слово и введи одно и то же на всех устройствах — правки (имена, фото, смены) будут синхронизироваться автоматически. Этим же кодом данные шифруются, в облаке они недоступны посторонним. Не потеряй код: без него данные не открыть.</p>
     </div>
+    <details class="share-details">
+      <summary>Другой способ — разовая ссылка (без облака)</summary>
+      <div class="share-row">
+        <button class="btn" id="shareBtn">🔗 Скопировать ссылку с графиком</button>
+        <p class="hint">Откройте ссылку на другом устройстве. Фотографии в ссылку не входят.</p>
+      </div>
+    </details>
   </div>
 </div>
 
@@ -618,8 +643,21 @@ const fileInput = document.getElementById('fileInput');
 let draft = [];
 let photoTargetIdx = null;
 
-function openSettings(){ draft = JSON.parse(JSON.stringify(state.people)); renderEditor(); sheetBack.classList.add('open'); }
+function openSettings(){
+  draft = JSON.parse(JSON.stringify(state.people));
+  renderEditor();
+  document.getElementById('syncCode').value = localStorage.getItem('rhythm-sync') || '';
+  updateSyncBadge();
+  sheetBack.classList.add('open');
+}
 function closeSettings(){ sheetBack.classList.remove('open'); }
+function updateSyncBadge(){
+  const code = localStorage.getItem('rhythm-sync') || '';
+  const b = document.getElementById('syncBadge'); if(!b) return;
+  if(code && window.CloudSync && window.CloudSync.ready()){ b.textContent='включена'; b.classList.add('on'); }
+  else if(code){ b.textContent='подключение…'; b.classList.remove('on'); }
+  else { b.textContent='выключена'; b.classList.remove('on'); }
+}
 
 function renderEditor(){
   peopleList.innerHTML = '';
@@ -724,7 +762,20 @@ document.getElementById('saveBtn').onclick = ()=>{
     .map(p=>({name:(p.name||'').trim()||'—', color:p.color, startDate:p.startDate, work:Math.max(0,p.work|0), off:Math.max(0,p.off|0), photo:p.photo||null}))
     .filter(p=>p.work+p.off>0);
   if(!clean.length){ toast('Добавьте хотя бы одного человека'); return; }
-  state.people = clean; saveState(); render(); closeSettings();
+  state.people = clean; saveState(); render();
+
+  // синхронизация: код изменился → перезапуск, иначе — отправка в облако
+  const code = (document.getElementById('syncCode').value||'').trim();
+  const prev = localStorage.getItem('rhythm-sync')||'';
+  if(code !== prev){
+    if(code) localStorage.setItem('rhythm-sync', code); else localStorage.removeItem('rhythm-sync');
+    closeSettings();
+    toast(code ? 'Синхронизация включается…' : 'Синхронизация выключена');
+    setTimeout(()=>location.reload(), 700);
+    return;
+  }
+  if(window.CloudSync && window.CloudSync.ready()) window.CloudSync.push(state).catch(()=>{});
+  closeSettings();
 };
 
 /* поделиться графиком (без фото) */
@@ -743,7 +794,101 @@ function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.
 
 render();
 
+/* ───────── Облачная синхронизация ───────── */
+let firstRemote = true;
+function applyRemote(remote){
+  if(!remote || !Array.isArray(remote.people) || !remote.people.length) return;
+  const incoming = JSON.stringify(remote);
+  if(incoming === JSON.stringify(state)){ firstRemote = false; return; } // эхо/без изменений
+  state = remote;
+  try{ localStorage.setItem('rhythm-cal', incoming); }catch(e){}
+  render();
+  if(!firstRemote) toast('Обновлено с другого устройства');
+  firstRemote = false;
+}
+function initCloud(){
+  const code = localStorage.getItem('rhythm-sync');
+  if(!code || !window.CloudSync) return;
+  window.CloudSync.connect(code, applyRemote, ()=>{
+    // облако пустое — заливаем локальные данные (с фото)
+    window.CloudSync.push(state).catch(()=>{});
+  }).then(()=>updateSyncBadge())
+    .catch(err=>{ console.warn('sync error', err); toast('Не удалось подключить синхронизацию'); });
+}
+if(window.CloudSync) initCloud();
+else window.addEventListener('cloudsync-loaded', initCloud);
+
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+</script>
+
+<!-- Firebase: облачная синхронизация с клиентским шифрованием -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDlKn78hwMa-kM925qMWy3jSP-fyUQ6dTU",
+  authDomain: "grafik-smen-eb745.firebaseapp.com",
+  databaseURL: "https://grafik-smen-eb745-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "grafik-smen-eb745",
+  storageBucket: "grafik-smen-eb745.firebasestorage.app",
+  messagingSenderId: "593614303579",
+  appId: "1:593614303579:web:db3c4021632c7520deaa7e"
+};
+
+let app, auth, db, authPromise, room=null, key=null, isReady=false, applying=false;
+const encT = new TextEncoder(), decT = new TextDecoder();
+const SALT = encT.encode("grafik-smen/v1");
+
+async function ensureAuth(){
+  if(!app){ app = initializeApp(firebaseConfig); auth = getAuth(app); db = getDatabase(app); }
+  if(!authPromise) authPromise = signInAnonymously(auth).catch(e=>console.warn('anon auth:', e && e.code));
+  await authPromise;
+}
+async function deriveKey(code){
+  const base = await crypto.subtle.importKey('raw', encT.encode(code), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt:SALT, iterations:100000, hash:'SHA-256'},
+    base, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+}
+async function roomFor(code){
+  const h = await crypto.subtle.digest('SHA-256', encT.encode('room:'+code));
+  return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,40);
+}
+const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64 = s => Uint8Array.from(atob(s), c=>c.charCodeAt(0));
+
+window.CloudSync = {
+  ready(){ return isReady; },
+  async connect(code, onData, onEmpty){
+    await ensureAuth();
+    key = await deriveKey(code);
+    room = await roomFor(code);
+    isReady = true;
+    let seeded = false;
+    onValue(ref(db, 'rooms/'+room), async snap=>{
+      const val = snap.val();
+      if(val && val.ct){
+        try{
+          const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:unb64(val.iv)}, key, unb64(val.ct));
+          applying = true; onData(JSON.parse(decT.decode(pt))); applying = false;
+          seeded = true;
+        }catch(e){ console.warn('decrypt failed', e); }
+      } else if(!seeded){
+        seeded = true;
+        if(onEmpty) onEmpty();
+      }
+    });
+    return true;
+  },
+  async push(state){
+    if(!isReady || !key || applying) return;
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, encT.encode(JSON.stringify(state)));
+    await set(ref(db, 'rooms/'+room), { v:1, iv:b64(iv), ct:b64(ct), t:Date.now() });
+  }
+};
+window.dispatchEvent(new Event('cloudsync-loaded'));
 </script>
 </body>
 </html>
