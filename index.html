@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Ритм смен</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  /* ───────────────────────── Токены ───────────────────────── */
+  :root{
+    --bg-0:#0b1020; --bg-1:#121a33; --bg-2:#182247;
+    --ink:#eaf0ff; --ink-dim:#9aa8ce; --ink-faint:#6b789e;
+    --glass:rgba(255,255,255,.055);
+    --glass-2:rgba(255,255,255,.09);
+    --stroke:rgba(255,255,255,.10);
+    --stroke-2:rgba(255,255,255,.18);
+    --shadow:0 2px 6px rgba(0,0,0,.30), 0 20px 50px -12px rgba(0,0,0,.55);
+    --shadow-lg:0 8px 24px rgba(0,0,0,.35), 0 40px 80px -20px rgba(0,0,0,.6);
+    --p1:#5b9dff;   /* персона A — прохладный */
+    --p2:#ff8a5b;   /* персона B — тёплый */
+    --radius:22px; --radius-sm:14px;
+    --font-display: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, -apple-system, sans-serif;
+    --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color-scheme: dark;
+  }
+  :root[data-theme="light"]{
+    --bg-0:#eef2fb; --bg-1:#e5ebfa; --bg-2:#dbe4f8;
+    --ink:#141a2e; --ink-dim:#4b5878; --ink-faint:#8a97b8;
+    --glass:rgba(255,255,255,.72);
+    --glass-2:rgba(255,255,255,.9);
+    --stroke:rgba(20,30,60,.09);
+    --stroke-2:rgba(20,30,60,.16);
+    --shadow:0 2px 6px rgba(30,45,90,.08), 0 18px 40px -14px rgba(30,45,90,.22);
+    --shadow-lg:0 10px 30px rgba(30,45,90,.12), 0 40px 70px -22px rgba(30,45,90,.28);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg-0:#eef2fb; --bg-1:#e5ebfa; --bg-2:#dbe4f8;
+      --ink:#141a2e; --ink-dim:#4b5878; --ink-faint:#8a97b8;
+      --glass:rgba(255,255,255,.72); --glass-2:rgba(255,255,255,.9);
+      --stroke:rgba(20,30,60,.09); --stroke-2:rgba(20,30,60,.16);
+      --shadow:0 2px 6px rgba(30,45,90,.08), 0 18px 40px -14px rgba(30,45,90,.22);
+      --shadow-lg:0 10px 30px rgba(30,45,90,.12), 0 40px 70px -22px rgba(30,45,90,.28);
+      color-scheme: light;
+    }
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:var(--font-body); color:var(--ink);
+    background:var(--bg-0);
+    min-height:100vh; overflow-x:hidden;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  /* Ambient-фон: медленно дышащие пятна света */
+  .aurora{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
+  .aurora::before,.aurora::after{
+    content:""; position:absolute; border-radius:50%; filter:blur(70px); opacity:.55;
+  }
+  .aurora::before{
+    width:60vmax; height:60vmax; left:-15vmax; top:-20vmax;
+    background:radial-gradient(circle at 30% 30%, var(--p1), transparent 60%);
+    animation:drift1 26s ease-in-out infinite alternate;
+  }
+  .aurora::after{
+    width:55vmax; height:55vmax; right:-18vmax; bottom:-22vmax;
+    background:radial-gradient(circle at 60% 60%, var(--p2), transparent 60%);
+    animation:drift2 30s ease-in-out infinite alternate;
+  }
+  @keyframes drift1{to{transform:translate(12vmax,8vmax) scale(1.15)}}
+  @keyframes drift2{to{transform:translate(-10vmax,-6vmax) scale(1.1)}}
+
+  .wrap{max-width:680px; margin:0 auto; padding:22px 16px 56px}
+
+  /* ───────────────────────── Шапка ───────────────────────── */
+  header.top{display:flex; align-items:center; justify-content:space-between; margin-bottom:26px}
+  .brand{display:flex; align-items:center; gap:11px}
+  .brand .mark{
+    width:38px; height:38px; border-radius:12px; display:grid; place-items:center; flex:0 0 auto;
+    background:linear-gradient(135deg, var(--p1), var(--p2)); box-shadow:var(--shadow);
+  }
+  .brand .mark span{width:16px; height:16px; display:grid; grid-template-columns:1fr 1fr; gap:2.5px}
+  .brand .mark i{background:rgba(255,255,255,.92); border-radius:2px}
+  .brand .mark i:nth-child(2),.brand .mark i:nth-child(3){background:rgba(255,255,255,.4)}
+  .brand b{font-family:var(--font-display); font-size:17px; font-weight:800; letter-spacing:.2px}
+  .brand small{display:block; font-size:11px; color:var(--ink-dim); font-weight:600; letter-spacing:.4px; margin-top:-1px}
+  .tools{display:flex; gap:9px}
+  .icon-btn{
+    width:42px; height:42px; border-radius:13px; border:1px solid var(--stroke);
+    background:var(--glass); color:var(--ink); font-size:18px; cursor:pointer;
+    display:grid; place-items:center; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    transition:transform .15s, background .2s, border-color .2s;
+  }
+  .icon-btn:hover{background:var(--glass-2); border-color:var(--stroke-2)}
+  .icon-btn:active{transform:scale(.93)}
+
+  /* ───────────────────────── Герой: сегодня ───────────────────────── */
+  .hero{margin-bottom:26px}
+  .eyebrow{font-size:12px; font-weight:800; letter-spacing:2.4px; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px}
+  .hero h1{
+    font-family:var(--font-display); font-weight:800; font-size:30px; line-height:1.05;
+    margin:0 0 18px; letter-spacing:-.4px;
+  }
+  .persons{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  @media (max-width:460px){ .persons{grid-template-columns:1fr} }
+
+  .pcard{
+    position:relative; border-radius:var(--radius); padding:16px; overflow:hidden;
+    background:var(--glass); border:1px solid var(--stroke); box-shadow:var(--shadow);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    transition:transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s, border-color .25s;
+  }
+  .pcard:hover{transform:translateY(-3px); box-shadow:var(--shadow-lg); border-color:var(--stroke-2)}
+  .pcard .glow{position:absolute; inset:0; z-index:0; opacity:.5;
+    background:radial-gradient(120% 90% at 15% 0%, var(--c) 0%, transparent 55%);}
+  :root[data-theme="light"] .pcard .glow{opacity:.28}
+  .pcard > *{position:relative; z-index:1}
+  .pcard .who{display:flex; align-items:center; gap:12px; margin-bottom:14px}
+  .avatar{
+    width:52px; height:52px; border-radius:50%; flex:0 0 auto; overflow:hidden;
+    display:grid; place-items:center; font-family:var(--font-display); font-weight:800; font-size:21px; color:#fff;
+    box-shadow:0 0 0 2px var(--glass-2), 0 4px 14px rgba(0,0,0,.35);
+    background:linear-gradient(140deg, var(--c), color-mix(in oklab, var(--c) 55%, #000));
+  }
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block}
+  .who .name{font-family:var(--font-display); font-weight:800; font-size:17px; line-height:1.1}
+  .who .role{font-size:12.5px; color:var(--ink-dim); font-weight:600; margin-top:2px}
+  .status{display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:14px; margin-bottom:3px}
+  .status .beacon{width:9px; height:9px; border-radius:50%; background:var(--c); flex:0 0 auto}
+  .status.on .beacon{box-shadow:0 0 0 0 color-mix(in oklab, var(--c) 60%, transparent); animation:pulse 2.2s infinite}
+  .status.off .beacon{background:var(--ink-faint)}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 color-mix(in oklab, var(--c) 55%, transparent)}
+    70%{box-shadow:0 0 0 10px transparent} 100%{box-shadow:0 0 0 0 transparent}
+  }
+  .countdown{font-size:13px; color:var(--ink-dim); font-weight:600; margin-bottom:13px}
+  .countdown b{color:var(--ink); font-weight:800}
+  /* Дорожка цикла */
+  .track{display:flex; gap:4px}
+  .track .seg{height:7px; flex:1; border-radius:99px; background:color-mix(in oklab, var(--ink-faint) 45%, transparent)}
+  .track .seg.work{background:color-mix(in oklab, var(--c) 85%, transparent)}
+  .track .seg.now{outline:2px solid var(--ink); outline-offset:2px}
+  :root[data-theme="light"] .track .seg.now{outline-color:var(--c)}
+
+  /* ───────────────────────── Календарь ───────────────────────── */
+  .calcard{
+    border-radius:var(--radius); background:var(--glass); border:1px solid var(--stroke);
+    box-shadow:var(--shadow); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    padding:8px 10px 12px;
+  }
+  .monthbar{display:flex; align-items:center; justify-content:space-between; padding:10px 6px 12px}
+  .monthbar h2{font-family:var(--font-display); font-size:19px; font-weight:800; margin:0; letter-spacing:-.2px}
+  .monthbar .side{display:flex; align-items:center; gap:7px}
+  .nav-btn{
+    width:38px; height:38px; border-radius:12px; border:1px solid var(--stroke); background:var(--glass);
+    color:var(--ink); font-size:19px; cursor:pointer; display:grid; place-items:center;
+    transition:transform .15s, background .2s;
+  }
+  .nav-btn:hover{background:var(--glass-2)} .nav-btn:active{transform:scale(.92)}
+  .today-btn{
+    border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer;
+    border-radius:12px; padding:0 14px; height:38px; font-weight:700; font-size:13.5px; font-family:var(--font-body);
+    transition:background .2s;
+  }
+  .today-btn:hover{background:var(--glass-2)}
+
+  .dow{display:grid; grid-template-columns:repeat(7,1fr); padding:0 2px 8px}
+  .dow span{text-align:center; font-size:11px; font-weight:800; letter-spacing:.6px; color:var(--ink-faint); text-transform:uppercase}
+  .grid{display:grid; grid-template-columns:repeat(7,1fr); gap:5px}
+  .cell{
+    position:relative; aspect-ratio:1/1.08; border-radius:var(--radius-sm);
+    border:1px solid var(--stroke); background:color-mix(in oklab, var(--ink) 3%, transparent);
+    padding:6px 6px 5px; display:flex; flex-direction:column; overflow:hidden;
+    transition:transform .18s, box-shadow .2s;
+  }
+  .cell.dim{opacity:.32}
+  .cell.today{border-color:transparent; box-shadow:0 0 0 2px var(--ink), var(--shadow)}
+  :root[data-theme="light"] .cell.today{box-shadow:0 0 0 2px var(--ink-dim), var(--shadow)}
+  .cell .num{font-family:var(--font-display); font-size:14px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums}
+  .cell.wknd .num{color:var(--ink-faint)}
+  .cell .tint{position:absolute; inset:0; z-index:0}
+  .cell > *{position:relative; z-index:1}
+  .who-dots{margin-top:auto; display:flex; align-items:center; gap:-4px; padding-left:3px}
+  .mini{
+    width:20px; height:20px; border-radius:50%; overflow:hidden; margin-left:-5px;
+    display:grid; place-items:center; font-size:10px; font-weight:800; color:#fff; font-family:var(--font-display);
+    box-shadow:0 0 0 1.5px var(--bg-1);
+    background:linear-gradient(140deg, var(--c), color-mix(in oklab, var(--c) 55%, #000));
+  }
+  .mini:first-child{margin-left:0}
+  .mini img{width:100%; height:100%; object-fit:cover; display:block}
+  /* Появление ячеек */
+  @keyframes cellIn{from{opacity:0; transform:translateY(8px) scale(.97)} to{opacity:1; transform:none}}
+  .anim .cell{animation:cellIn .42s cubic-bezier(.2,.8,.2,1) backwards; animation-delay:calc(var(--i) * 11ms)}
+
+  /* View Transitions при смене месяца */
+  ::view-transition-old(cal){animation:vtOut .28s ease both}
+  ::view-transition-new(cal){animation:vtIn .32s ease both}
+  @keyframes vtOut{to{opacity:0; transform:translateY(-6px)}}
+  @keyframes vtIn{from{opacity:0; transform:translateY(8px)}}
+
+  /* ───────────────────────── Настройки ───────────────────────── */
+  .sheet-back{
+    position:fixed; inset:0; z-index:60; display:none;
+    background:rgba(6,10,24,.55); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+    align-items:flex-end; justify-content:center;
+  }
+  .sheet-back.open{display:flex; animation:fadeIn .2s ease}
+  @media (min-width:600px){ .sheet-back.open{align-items:center} }
+  @keyframes fadeIn{from{opacity:0}}
+  .sheet{
+    width:100%; max-width:600px; max-height:90vh; overflow:auto;
+    background:var(--bg-1); border:1px solid var(--stroke-2); border-bottom:0;
+    border-radius:26px 26px 0 0; padding:8px 18px calc(24px + env(safe-area-inset-bottom));
+    animation:sheetUp .32s cubic-bezier(.2,.8,.2,1);
+  }
+  @media (min-width:600px){ .sheet{border-radius:26px; border-bottom:1px solid var(--stroke-2)} }
+  @keyframes sheetUp{from{transform:translateY(40px); opacity:.6}}
+  .grabber{width:40px; height:5px; border-radius:99px; background:var(--stroke-2); margin:6px auto 14px}
+  .sheet h3{font-family:var(--font-display); font-size:20px; font-weight:800; margin:0 0 4px}
+  .sheet .lead{color:var(--ink-dim); font-size:13.5px; margin:0 0 18px; line-height:1.5}
+
+  .person{border:1px solid var(--stroke); border-radius:18px; padding:14px; margin-bottom:12px; background:var(--glass)}
+  .person .head{display:flex; align-items:center; gap:13px; margin-bottom:14px}
+  .up-avatar{
+    width:58px; height:58px; border-radius:50%; flex:0 0 auto; cursor:pointer; position:relative; overflow:hidden;
+    display:grid; place-items:center; color:#fff; font-family:var(--font-display); font-weight:800; font-size:22px;
+    background:linear-gradient(140deg, var(--c), color-mix(in oklab, var(--c) 55%, #000));
+    box-shadow:0 0 0 2px var(--glass-2);
+  }
+  .up-avatar img{width:100%; height:100%; object-fit:cover; display:block}
+  .up-avatar .cam{position:absolute; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.42); opacity:0; transition:.2s; font-size:19px}
+  .up-avatar:hover .cam{opacity:1}
+  .head .grow{flex:1; min-width:0}
+  .head input[type=text]{width:100%}
+  .rm-photo{background:none; border:none; color:var(--p2); font-weight:700; font-size:12px; cursor:pointer; padding:2px 0; margin-top:3px}
+  .fields{display:flex; gap:10px; flex-wrap:wrap}
+  .field{display:flex; flex-direction:column; gap:5px; flex:1 1 140px; min-width:130px}
+  .field > label{font-size:11.5px; font-weight:700; color:var(--ink-dim); letter-spacing:.2px}
+  input[type=text],input[type=date],select{
+    width:100%; border:1px solid var(--stroke-2); background:color-mix(in oklab, var(--ink) 5%, transparent);
+    color:var(--ink); border-radius:12px; padding:11px 12px; font-size:15px; font-family:var(--font-body);
+    transition:border-color .2s;
+  }
+  input:focus,select:focus{outline:none; border-color:var(--p1)}
+  .swatches{display:flex; gap:7px; flex-wrap:wrap; align-items:center}
+  .sw{width:28px; height:28px; border-radius:9px; cursor:pointer; border:2px solid transparent; transition:transform .12s}
+  .sw:hover{transform:scale(1.12)} .sw.sel{border-color:var(--ink); box-shadow:0 0 0 2px var(--bg-1)}
+  .sw.custom{display:grid; place-items:center; background:var(--glass-2); color:var(--ink-dim); font-size:15px; position:relative; overflow:hidden}
+  .sw.custom input{position:absolute; inset:0; opacity:0; cursor:pointer}
+  .del-person{background:none; border:none; color:var(--ink-faint); font-weight:700; font-size:13px; cursor:pointer; padding:4px}
+  .del-person:hover{color:var(--p2)}
+  .phead{display:flex; justify-content:space-between; align-items:center; margin-bottom:2px}
+  .phead .lbl{font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-faint)}
+
+  .add-btn{
+    width:100%; border:1.5px dashed var(--stroke-2); background:transparent; color:var(--ink);
+    border-radius:15px; padding:13px; font-weight:700; font-size:14.5px; cursor:pointer; font-family:var(--font-body);
+    transition:background .2s, border-color .2s;
+  }
+  .add-btn:hover{background:var(--glass); border-color:var(--p1)}
+  .actions{display:flex; gap:10px; margin-top:16px}
+  .btn{border-radius:14px; padding:13px; font-weight:700; font-size:15px; cursor:pointer; font-family:var(--font-body); border:1px solid var(--stroke-2); flex:1; transition:transform .12s, filter .2s}
+  .btn:active{transform:scale(.98)}
+  .btn.ghost{background:var(--glass); color:var(--ink)}
+  .btn.primary{background:linear-gradient(135deg, var(--p1), color-mix(in oklab, var(--p1) 60%, var(--p2))); color:#fff; border-color:transparent; box-shadow:var(--shadow)}
+  .btn.primary:hover{filter:brightness(1.06)}
+  .share-row{margin-top:14px; padding-top:14px; border-top:1px solid var(--stroke)}
+  .share-row .btn{width:100%; background:var(--glass); color:var(--ink)}
+  .hint{font-size:12px; color:var(--ink-faint); margin-top:9px; line-height:1.5}
+
+  .toast{
+    position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px);
+    background:var(--bg-2); color:var(--ink); border:1px solid var(--stroke-2);
+    padding:12px 20px; border-radius:14px; font-size:14px; font-weight:700; box-shadow:var(--shadow-lg);
+    opacity:0; pointer-events:none; transition:.28s cubic-bezier(.2,.8,.2,1); z-index:80;
+  }
+  .toast.show{opacity:1; transform:translate(-50%,0)}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
+  }
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="mark"><span><i></i><i></i><i></i><i></i></span></div>
+      <div><b>Ритм смен</b><small id="brandSub">график на двоих</small></div>
+    </div>
+    <div class="tools">
+      <button class="icon-btn" id="themeBtn" aria-label="Сменить тему">◐</button>
+      <button class="icon-btn" id="settingsBtn" aria-label="Настройки">⚙</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Сегодня</div>
+    <h1 id="todayTitle">—</h1>
+    <div class="persons" id="persons"></div>
+  </section>
+
+  <section class="calcard">
+    <div class="monthbar">
+      <div class="side">
+        <button class="nav-btn" id="prevBtn" aria-label="Предыдущий месяц">‹</button>
+      </div>
+      <h2 id="monthTitle">—</h2>
+      <div class="side">
+        <button class="today-btn" id="todayBtn">Сегодня</button>
+        <button class="nav-btn" id="nextBtn" aria-label="Следующий месяц">›</button>
+      </div>
+    </div>
+    <div class="dow"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+    <div class="grid anim" id="grid"></div>
+  </section>
+</div>
+
+<!-- Настройки -->
+<div class="sheet-back" id="sheetBack">
+  <div class="sheet" role="dialog" aria-modal="true">
+    <div class="grabber"></div>
+    <h3>Настройки</h3>
+    <p class="lead">Загрузите фото, выберите цвет, укажите любой рабочий день и график — весь календарь построится сам.</p>
+    <div id="peopleList"></div>
+    <button class="add-btn" id="addPerson">+ Добавить человека</button>
+    <div class="actions">
+      <button class="btn ghost" id="cancelBtn">Отмена</button>
+      <button class="btn primary" id="saveBtn">Сохранить</button>
+    </div>
+    <div class="share-row">
+      <button class="btn" id="shareBtn">🔗 Скопировать ссылку с графиком</button>
+      <p class="hint">Откройте ссылку на другом устройстве или сохраните в закладки — там будет тот же график. Фотографии в ссылку не входят (слишком тяжёлые) — их можно загрузить на каждом устройстве отдельно.</p>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" hidden>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ───────── Даты (UTC-дни, чтобы не мешал переход на летнее время) ───────── */
+const DAY = 86400000;
+const dayIndex = d => Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY);
+const parseISO = s => { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
+const toISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const todayISO = toISO(new Date());
+const fmtDay = new Intl.DateTimeFormat('ru-RU',{weekday:'long', day:'numeric', month:'long'});
+const fmtMonth = new Intl.DateTimeFormat('ru-RU',{month:'long', year:'numeric'});
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+function plural(n, forms){ // [день, дня, дней]
+  const a=Math.abs(n)%100, b=a%10;
+  if(a>10&&a<20) return forms[2];
+  if(b>1&&b<5) return forms[1];
+  if(b===1) return forms[0];
+  return forms[2];
+}
+
+/* ───────── Модель ───────── */
+const PATTERNS = [
+  {v:"2/2", label:"2 / 2"}, {v:"3/3", label:"3 / 3"}, {v:"1/2", label:"1 / 2"},
+  {v:"1/3", label:"1 / 3"}, {v:"4/4", label:"4 / 4"}, {v:"5/2", label:"5 / 2"},
+];
+const SWATCHES = ["#5b9dff","#ff8a5b","#39d3a5","#c084fc","#f6c453","#f472b6","#4fd1c5","#fb7185"];
+
+const DEFAULT = { people:[
+  {name:"Я",        color:"#5b9dff", startDate:todayISO, work:2, off:2, photo:null},
+  {name:"Напарник", color:"#ff8a5b", startDate:todayISO, work:2, off:2, photo:null},
+]};
+
+function cycleInfo(p, d){
+  const cycle = p.work + p.off;
+  const diff = dayIndex(d) - dayIndex(parseISO(p.startDate));
+  const pos = ((diff % cycle) + cycle) % cycle;
+  const working = pos < p.work;
+  const remaining = working ? (p.work - pos) : (cycle - pos); // включая сегодня
+  return {cycle, pos, working, remaining};
+}
+const isWorking = (p,d) => cycleInfo(p,d).working;
+const initial = name => (name||'?').trim().charAt(0).toUpperCase() || '?';
+
+/* ───────── Хранение ───────── */
+function loadState(){
+  const h = location.hash;
+  if(h.startsWith('#cfg=')){
+    try{
+      const json = decodeURIComponent(escape(atob(decodeURIComponent(h.slice(5)))));
+      const s = JSON.parse(json);
+      if(s?.people?.length){
+        // сохраняем локальные фото при импорте графика
+        const prev = safeLocal();
+        s.people.forEach((p,i)=>{ if(!p.photo && prev?.people?.[i]) p.photo = prev.people[i].photo||null; });
+        localStorage.setItem('rhythm-cal', JSON.stringify(s));
+        history.replaceState(null,'',location.pathname+location.search);
+        return s;
+      }
+    }catch(e){}
+  }
+  return safeLocal() || JSON.parse(JSON.stringify(DEFAULT));
+}
+function safeLocal(){ try{ const r=localStorage.getItem('rhythm-cal'); const s=r&&JSON.parse(r); return s?.people?.length? s : null; }catch(e){ return null; } }
+function saveState(){ try{ localStorage.setItem('rhythm-cal', JSON.stringify(state)); }catch(e){ toast('Не удалось сохранить (нет места)'); } }
+
+let state = loadState();
+let viewY, viewM;
+(()=>{ const n=new Date(); viewY=n.getFullYear(); viewM=n.getMonth(); })();
+
+/* ───────── Тема ───────── */
+(function(){ const s=localStorage.getItem('rhythm-theme'); if(s) document.documentElement.setAttribute('data-theme',s); })();
+document.getElementById('themeBtn').onclick = ()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const dark = cur ? cur==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  const next = dark ? 'light':'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('rhythm-theme', next);
+  document.querySelector('meta[name=theme-color]').setAttribute('content', next==='dark'?'#0b1020':'#eef2fb');
+};
+
+/* ───────── Аватар (превью) ───────── */
+function avatarHTML(p, cls){
+  const inner = p.photo ? `<img src="${p.photo}" alt="">` : initial(p.name);
+  return `<div class="${cls}" style="--c:${p.color}">${inner}</div>`;
+}
+
+/* ───────── Герой: карточки «сегодня» ───────── */
+function renderHero(){
+  const now = new Date();
+  document.getElementById('todayTitle').textContent = cap(fmtDay.format(now));
+  document.getElementById('brandSub').textContent =
+    state.people.length===2 ? 'график на двоих' : `график · ${state.people.length} ${plural(state.people.length,['человек','человека','человек'])}`;
+
+  const box = document.getElementById('persons');
+  box.innerHTML = '';
+  state.people.forEach(p=>{
+    const ci = cycleInfo(p, now);
+    let text;
+    if(ci.working) text = ci.remaining===1 ? 'Последний день смены' : `В смене ещё <b>${ci.remaining}</b> ${plural(ci.remaining,['день','дня','дней'])}`;
+    else text = ci.remaining===1 ? 'Смена <b>завтра</b>' : `Смена через <b>${ci.remaining}</b> ${plural(ci.remaining,['день','дня','дней'])}`;
+
+    // дорожка цикла
+    let track = '';
+    for(let i=0;i<ci.cycle;i++){
+      const isWork = i < p.work;
+      track += `<div class="seg ${isWork?'work':''} ${i===ci.pos?'now':''}"></div>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'pcard';
+    card.style.setProperty('--c', p.color);
+    card.innerHTML = `
+      <div class="glow"></div>
+      <div class="who">
+        ${avatarHTML(p,'avatar')}
+        <div>
+          <div class="name">${escapeHtml(p.name||'—')}</div>
+          <div class="role">${p.work}/${p.off} · ${ci.working?'на смене':'выходной'}</div>
+        </div>
+      </div>
+      <div class="status ${ci.working?'on':'off'}"><span class="beacon"></span>${ci.working?'В смене':'Отдыхает'}</div>
+      <div class="countdown">${text}</div>
+      <div class="track">${track}</div>
+    `;
+    box.appendChild(card);
+  });
+}
+
+/* ───────── Календарь ───────── */
+function renderCalendar(){
+  document.getElementById('monthTitle').textContent = cap(fmtMonth.format(new Date(viewY, viewM, 1)));
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  grid.classList.remove('anim'); void grid.offsetWidth; grid.classList.add('anim');
+
+  const first = new Date(viewY, viewM, 1);
+  const offset = (first.getDay()+6)%7;
+  const start = new Date(viewY, viewM, 1-offset);
+  const todayIdx = dayIndex(new Date());
+
+  for(let i=0;i<42;i++){
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate()+i);
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.style.setProperty('--i', i);
+    if(d.getMonth()!==viewM) cell.classList.add('dim');
+    if(((d.getDay()+6)%7)>=5) cell.classList.add('wknd');
+    if(dayIndex(d)===todayIdx) cell.classList.add('today');
+
+    const workers = state.people.filter(p=>isWorking(p,d));
+
+    // мягкая подсветка фона цветом(ами) работающих
+    let tint = '';
+    if(workers.length===1) tint = `background:color-mix(in oklab, ${workers[0].color} 15%, transparent)`;
+    else if(workers.length>=2){
+      const c = `color-mix(in oklab, ${workers[0].color}, ${workers[1].color})`;
+      tint = `background:color-mix(in oklab, ${c} 16%, transparent)`;
+    }
+
+    let dots = '';
+    workers.forEach(p=>{ dots += avatarHTML(p,'mini'); });
+
+    cell.innerHTML = `
+      <div class="tint" style="${tint}"></div>
+      <div class="num">${d.getDate()}</div>
+      <div class="who-dots">${dots}</div>
+    `;
+    grid.appendChild(cell);
+  }
+}
+
+function render(){ renderHero(); renderCalendar(); }
+
+/* ───────── Навигация (с View Transitions) ───────── */
+function changeMonth(delta){
+  const apply = ()=>{
+    viewM += delta;
+    if(viewM<0){ viewM=11; viewY--; } else if(viewM>11){ viewM=0; viewY++; }
+    renderCalendar();
+  };
+  const grid = document.getElementById('grid');
+  if(document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+    grid.style.viewTransitionName='cal';
+    const t = document.startViewTransition(apply);
+    t.finished.finally(()=>{ grid.style.viewTransitionName=''; });
+  } else apply();
+}
+document.getElementById('prevBtn').onclick = ()=>changeMonth(-1);
+document.getElementById('nextBtn').onclick = ()=>changeMonth(1);
+document.getElementById('todayBtn').onclick = ()=>{ const n=new Date(); viewY=n.getFullYear(); viewM=n.getMonth(); renderCalendar(); };
+// свайп по календарю
+(function(){ let x0=null; const g=document.querySelector('.calcard');
+  g.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+  g.addEventListener('touchend',e=>{ if(x0===null)return; const dx=e.changedTouches[0].clientX-x0; if(Math.abs(dx)>55) changeMonth(dx<0?1:-1); x0=null; },{passive:true});
+})();
+
+/* ───────── Настройки ───────── */
+const sheetBack = document.getElementById('sheetBack');
+const peopleList = document.getElementById('peopleList');
+const fileInput = document.getElementById('fileInput');
+let draft = [];
+let photoTargetIdx = null;
+
+function openSettings(){ draft = JSON.parse(JSON.stringify(state.people)); renderEditor(); sheetBack.classList.add('open'); }
+function closeSettings(){ sheetBack.classList.remove('open'); }
+
+function renderEditor(){
+  peopleList.innerHTML = '';
+  draft.forEach((p, idx)=>{
+    const patVal = `${p.work}/${p.off}`;
+    const isCustom = !PATTERNS.some(pt=>pt.v===patVal);
+    const box = document.createElement('div');
+    box.className = 'person';
+    box.style.setProperty('--c', p.color);
+    box.innerHTML = `
+      <div class="phead">
+        <span class="lbl">Человек ${idx+1}</span>
+        ${draft.length>1?`<button class="del-person" data-del="${idx}">Удалить</button>`:''}
+      </div>
+      <div class="head">
+        <div class="up-avatar" data-photo="${idx}" style="--c:${p.color}">
+          ${p.photo?`<img src="${p.photo}" alt="">`:initial(p.name)}
+          <div class="cam">📷</div>
+        </div>
+        <div class="grow">
+          <input type="text" data-f="name" data-i="${idx}" value="${escapeHtml(p.name)}" placeholder="Имя" maxlength="20">
+          ${p.photo?`<button class="rm-photo" data-rm="${idx}">Убрать фото</button>`:''}
+        </div>
+      </div>
+      <div class="fields">
+        <div class="field">
+          <label>Любой рабочий день</label>
+          <input type="date" data-f="startDate" data-i="${idx}" value="${p.startDate}">
+        </div>
+        <div class="field">
+          <label>График</label>
+          <select data-f="pattern" data-i="${idx}">
+            ${PATTERNS.map(pt=>`<option value="${pt.v}" ${pt.v===patVal?'selected':''}>${pt.label}</option>`).join('')}
+            <option value="custom" ${isCustom?'selected':''}>Свой…</option>
+          </select>
+        </div>
+      </div>
+      <div class="fields" data-custom="${idx}" style="${isCustom?'':'display:none'}; margin-top:10px">
+        <div class="field"><label>Рабочих подряд</label><input type="text" inputmode="numeric" data-f="work" data-i="${idx}" value="${p.work}"></div>
+        <div class="field"><label>Выходных подряд</label><input type="text" inputmode="numeric" data-f="off" data-i="${idx}" value="${p.off}"></div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Цвет</label>
+        <div class="swatches">
+          ${SWATCHES.map(c=>`<div class="sw ${c.toLowerCase()===p.color.toLowerCase()?'sel':''}" style="background:${c}" data-color="${c}" data-i="${idx}"></div>`).join('')}
+          <label class="sw custom" title="Свой цвет">🎨<input type="color" data-f="color" data-i="${idx}" value="${p.color}"></label>
+        </div>
+      </div>
+    `;
+    peopleList.appendChild(box);
+  });
+  bindEditor();
+}
+
+function bindEditor(){
+  peopleList.querySelectorAll('[data-del]').forEach(b=> b.onclick=()=>{ draft.splice(+b.dataset.del,1); renderEditor(); });
+  peopleList.querySelectorAll('[data-rm]').forEach(b=> b.onclick=()=>{ draft[+b.dataset.rm].photo=null; renderEditor(); });
+  peopleList.querySelectorAll('[data-photo]').forEach(b=> b.onclick=()=>{ photoTargetIdx=+b.dataset.photo; fileInput.value=''; fileInput.click(); });
+  peopleList.querySelectorAll('.sw[data-color]').forEach(b=> b.onclick=()=>{ draft[+b.dataset.i].color=b.dataset.color; renderEditor(); });
+  peopleList.querySelectorAll('[data-f]').forEach(inp=>{
+    const ev = inp.type==='color' ? 'input':'input';
+    inp.addEventListener(ev, ()=>{
+      const i=+inp.dataset.i, f=inp.dataset.f;
+      if(f==='pattern'){
+        const custom = peopleList.querySelector(`[data-custom="${i}"]`);
+        if(inp.value==='custom'){ custom.style.display='flex'; }
+        else{ custom.style.display='none'; const [w,o]=inp.value.split('/').map(Number); draft[i].work=w; draft[i].off=o; }
+      } else if(f==='work'||f==='off'){ draft[i][f]=Math.max(0, parseInt(inp.value)||0); }
+      else if(f==='color'){ draft[i].color=inp.value; renderEditor(); }
+      else { draft[i][f]=inp.value; }
+    });
+  });
+}
+
+/* загрузка и кроп фото */
+fileInput.onchange = ()=>{
+  const file = fileInput.files[0]; if(!file || photoTargetIdx===null) return;
+  const img = new Image(); const url = URL.createObjectURL(file);
+  img.onload = ()=>{
+    const S=320, c=document.createElement('canvas'); c.width=c.height=S;
+    const ctx=c.getContext('2d');
+    const scale=Math.max(S/img.width, S/img.height);
+    const w=img.width*scale, h=img.height*scale;
+    ctx.drawImage(img,(S-w)/2,(S-h)/2,w,h);
+    URL.revokeObjectURL(url);
+    draft[photoTargetIdx].photo = c.toDataURL('image/jpeg', 0.82);
+    photoTargetIdx=null; renderEditor();
+  };
+  img.onerror = ()=>{ toast('Не удалось открыть изображение'); photoTargetIdx=null; };
+  img.src = url;
+};
+
+document.getElementById('addPerson').onclick = ()=>{
+  draft.push({name:`Человек ${draft.length+1}`, color:SWATCHES[draft.length%SWATCHES.length], startDate:todayISO, work:2, off:2, photo:null});
+  renderEditor();
+};
+document.getElementById('settingsBtn').onclick = openSettings;
+document.getElementById('cancelBtn').onclick = closeSettings;
+sheetBack.onclick = e=>{ if(e.target===sheetBack) closeSettings(); };
+document.getElementById('saveBtn').onclick = ()=>{
+  const clean = draft.filter(p=>p.startDate)
+    .map(p=>({name:(p.name||'').trim()||'—', color:p.color, startDate:p.startDate, work:Math.max(0,p.work|0), off:Math.max(0,p.off|0), photo:p.photo||null}))
+    .filter(p=>p.work+p.off>0);
+  if(!clean.length){ toast('Добавьте хотя бы одного человека'); return; }
+  state.people = clean; saveState(); render(); closeSettings();
+};
+
+/* поделиться графиком (без фото) */
+document.getElementById('shareBtn').onclick = async ()=>{
+  const light = { people: state.people.map(({photo,...rest})=>rest) };
+  const cfg = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(light)))));
+  const url = location.origin + location.pathname + '#cfg=' + cfg;
+  try{ await navigator.clipboard.writeText(url); toast('Ссылка скопирована'); }
+  catch(e){ prompt('Скопируйте ссылку:', url); }
+};
+
+/* ───────── Утилиты ───────── */
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+let toastT;
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1900); }
+
+render();
+
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+</script>
+</body>
+</html>
