@@ -20,6 +20,7 @@
     --shadow-lg:0 8px 24px rgba(0,0,0,.35), 0 40px 80px -20px rgba(0,0,0,.6);
     --p1:#5b9dff;   /* персона A — прохладный */
     --p2:#ff8a5b;   /* персона B — тёплый */
+    --free:#2fbf8f; /* общий выходной — оба свободны */
     --radius:22px; --radius-sm:14px;
     --font-display: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, -apple-system, sans-serif;
     --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -147,6 +148,16 @@
   .track .seg.now{outline:2px solid var(--ink); outline-offset:2px}
   :root[data-theme="light"] .track .seg.now{outline-color:var(--c)}
 
+  /* Плашка «ближайший общий выходной» */
+  .common{margin-top:12px; display:flex; align-items:center; gap:12px; padding:13px 15px; border-radius:16px;
+    background:color-mix(in oklab, var(--free) 13%, var(--glass)); border:1px solid color-mix(in oklab, var(--free) 32%, transparent);
+    box-shadow:var(--shadow)}
+  .common[hidden]{display:none}
+  .common .ic{width:36px; height:36px; border-radius:11px; display:grid; place-items:center; font-size:18px; flex:0 0 auto;
+    background:color-mix(in oklab, var(--free) 28%, transparent)}
+  .common .tx{font-size:13.5px; color:var(--ink-dim); font-weight:600; line-height:1.35}
+  .common .tx b{color:var(--ink); font-weight:800}
+
   /* ───────────────────────── Календарь ───────────────────────── */
   .calcard{
     border-radius:var(--radius); background:var(--glass); border:1px solid var(--stroke);
@@ -182,18 +193,25 @@
   .cell.today{border-color:transparent; box-shadow:0 0 0 2px var(--ink), var(--shadow)}
   :root[data-theme="light"] .cell.today{box-shadow:0 0 0 2px var(--ink-dim), var(--shadow)}
   .cell .num{font-family:var(--font-display); font-size:14px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums}
-  .cell.wknd .num{color:var(--ink-faint)}
   .cell .tint{position:absolute; inset:0; z-index:0}
   .cell > *{position:relative; z-index:1}
-  .who-dots{margin-top:auto; display:flex; align-items:center; gap:-4px; padding-left:3px}
-  .mini{
-    width:20px; height:20px; border-radius:50%; overflow:hidden; margin-left:-5px;
-    display:grid; place-items:center; font-size:10px; font-weight:800; color:#fff; font-family:var(--font-display);
-    box-shadow:0 0 0 1.5px var(--bg-1);
-    background:linear-gradient(140deg, var(--c), color-mix(in oklab, var(--c) 55%, #000));
-  }
-  .mini:first-child{margin-left:0}
-  .mini img{width:100%; height:100%; object-fit:cover; display:block}
+  /* Дорожки статуса: одна на человека. Залито = рабочий день, контур = выходной */
+  .lanes{margin-top:auto; display:flex; flex-direction:column; gap:3px}
+  .lane{height:15px; border-radius:99px; display:flex; align-items:center; gap:4px; padding:0 3px}
+  .lane.on{background:color-mix(in oklab, var(--c) 92%, transparent); box-shadow:0 1px 5px color-mix(in oklab, var(--c) 40%, transparent)}
+  .lane.off{background:transparent; box-shadow:inset 0 0 0 1.6px color-mix(in oklab, var(--c) 32%, transparent); opacity:.6}
+  .lane .la{width:11px; height:11px; border-radius:50%; overflow:hidden; flex:0 0 auto; display:grid; place-items:center; font-size:7px; font-weight:800; color:#fff; background:color-mix(in oklab, var(--c) 55%, #000)}
+  .lane .la img{width:100%; height:100%; object-fit:cover; display:block}
+  .lane.on .la{box-shadow:0 0 0 1.4px rgba(255,255,255,.6)}
+  /* Общий выходной — оба свободны */
+  .cell.free{background:color-mix(in oklab, var(--free) 16%, transparent); border-color:color-mix(in oklab, var(--free) 45%, transparent)}
+  .free-lane{margin-top:auto; height:15px; border-radius:99px; display:flex; align-items:center; justify-content:center;
+    background:color-mix(in oklab, var(--free) 90%, transparent); color:#05271d; font-size:11px; font-weight:800}
+  /* Легенда календаря */
+  .cal-legend{display:flex; flex-wrap:wrap; gap:8px 14px; justify-content:center; padding:14px 6px 4px; font-size:11.5px; color:var(--ink-dim); font-weight:600}
+  .cal-legend .lg{display:inline-flex; align-items:center; gap:6px}
+  .cal-legend i{width:18px; height:11px; border-radius:99px; display:inline-block; flex:0 0 auto}
+  .cal-legend i.ghost{box-shadow:inset 0 0 0 1.6px var(--ink-faint); opacity:.7}
   /* Появление ячеек */
   @keyframes cellIn{from{opacity:0; transform:translateY(8px) scale(.97)} to{opacity:1; transform:none}}
   .anim .cell{animation:cellIn .42s cubic-bezier(.2,.8,.2,1) backwards; animation-delay:calc(var(--i) * 11ms)}
@@ -305,6 +323,7 @@
     <div class="eyebrow">Сегодня</div>
     <h1 id="todayTitle">—</h1>
     <div class="persons" id="persons"></div>
+    <div class="common" id="commonOff" hidden></div>
   </section>
 
   <section class="calcard">
@@ -320,6 +339,7 @@
     </div>
     <div class="dow"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
     <div class="grid anim" id="grid"></div>
+    <div class="cal-legend" id="calLegend"></div>
   </section>
 </div>
 
@@ -491,32 +511,71 @@ function renderCalendar(){
     cell.className = 'cell';
     cell.style.setProperty('--i', i);
     if(d.getMonth()!==viewM) cell.classList.add('dim');
-    if(((d.getDay()+6)%7)>=5) cell.classList.add('wknd');
     if(dayIndex(d)===todayIdx) cell.classList.add('today');
 
     const workers = state.people.filter(p=>isWorking(p,d));
+    const allFree = workers.length===0;
 
-    // мягкая подсветка фона цветом(ами) работающих
+    // лёгкая подсветка фона цветами тех, кто работает
     let tint = '';
-    if(workers.length===1) tint = `background:color-mix(in oklab, ${workers[0].color} 15%, transparent)`;
+    if(workers.length===1) tint = `background:color-mix(in oklab, ${workers[0].color} 12%, transparent)`;
     else if(workers.length>=2){
-      const c = `color-mix(in oklab, ${workers[0].color}, ${workers[1].color})`;
-      tint = `background:color-mix(in oklab, ${c} 16%, transparent)`;
+      const mix = `color-mix(in oklab, ${workers[0].color}, ${workers[1].color})`;
+      tint = `background:color-mix(in oklab, ${mix} 12%, transparent)`;
     }
 
-    let dots = '';
-    workers.forEach(p=>{ dots += avatarHTML(p,'mini'); });
+    let bottom;
+    if(state.people.length>=2 && allFree){
+      cell.classList.add('free');
+      bottom = `<div class="free-lane">🌿</div>`;
+    } else {
+      const lanes = state.people.map(p=>{
+        const on = isWorking(p,d);
+        const face = p.photo ? `<img src="${p.photo}" alt="">` : initial(p.name);
+        return `<div class="lane ${on?'on':'off'}" style="--c:${p.color}"><span class="la">${face}</span></div>`;
+      }).join('');
+      bottom = `<div class="lanes">${lanes}</div>`;
+    }
 
     cell.innerHTML = `
       <div class="tint" style="${tint}"></div>
       <div class="num">${d.getDate()}</div>
-      <div class="who-dots">${dots}</div>
+      ${bottom}
     `;
     grid.appendChild(cell);
   }
 }
 
-function render(){ renderHero(); renderCalendar(); }
+/* Легенда календаря: цвет↔человек + смысл контура и зелёного */
+function renderLegend(){
+  const el = document.getElementById('calLegend');
+  let html = state.people.map(p=>`<span class="lg"><i style="background:${p.color}"></i>${escapeHtml(p.name||'—')}</span>`).join('');
+  html += `<span class="lg"><i class="ghost"></i>выходной</span>`;
+  if(state.people.length>=2) html += `<span class="lg"><i style="background:var(--free)"></i>оба свободны</span>`;
+  el.innerHTML = html;
+}
+
+/* Плашка: ближайший день, когда свободны все */
+function renderCommon(){
+  const el = document.getElementById('commonOff');
+  if(state.people.length<2){ el.hidden = true; return; }
+  const base = new Date();
+  let found = null;
+  for(let i=0;i<120;i++){
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate()+i);
+    if(state.people.every(p=>!isWorking(p,d))){ found={d,i}; break; }
+  }
+  if(!found){ el.hidden = true; return; }
+  const word = state.people.length>2 ? 'все свободны' : 'оба свободны';
+  let msg;
+  if(found.i===0) msg = `Сегодня <b>${word}</b> — общий выходной 🎉`;
+  else if(found.i===1) msg = `Завтра общий выходной — <b>${cap(fmtDay.format(found.d))}</b>`;
+  else msg = `Ближайший общий выходной — <b>${cap(fmtDay.format(found.d))}</b> · через ${found.i} ${plural(found.i,['день','дня','дней'])}`;
+  el.innerHTML = `<div class="ic">🌿</div><div class="tx">${msg}</div>`;
+  el.hidden = false;
+}
+
+function render(){ renderHero(); renderCommon(); renderLegend(); renderCalendar(); }
 
 /* ───────── Навигация (с View Transitions) ───────── */
 function changeMonth(delta){
