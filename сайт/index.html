@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Марина Руслановна</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#0A0907;
+  --black-2:#151210;
+  --ivory:#F2ECDD;
+  --paper:#FFFFFF;
+  --ink:#16130E;
+  --ink-dim:#5C5343;
+  --ivory-dim:#B9AC93;
+  --gold:#C6A24B;
+  --gold-bright:#E3C177;
+  --gold-deep:#8C6D2A;
+  --line-d:rgba(227,193,119,.22);
+  --line-l:rgba(22,19,14,.16);
+  --font-display:'Bodoni Moda',Georgia,'Times New Roman',serif;
+  --font-body:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+section[id]{scroll-margin-top:84px;}
+body{
+  margin:0;background:var(--black);color:var(--ivory);
+  font-family:var(--font-body);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block;}
+a{color:inherit;}
+h1,h2,h3{font-family:var(--font-display);font-weight:500;text-wrap:balance;margin:0;}
+h1{font-size:clamp(2.6rem,7vw,5.6rem);line-height:.98;font-weight:400;letter-spacing:-.01em;}
+h2{font-size:clamp(1.9rem,3.6vw,3rem);line-height:1.08;font-weight:400;}
+h3{font-size:1.3rem;line-height:1.3;font-weight:500;}
+p{margin:0;}
+.wrap{max-width:1220px;margin:0 auto;padding-inline:clamp(20px,5vw,64px);}
+section{padding-block:clamp(64px,10vw,120px);}
+.sec-dark{background:var(--black);color:var(--ivory);}
+.sec-light{background:var(--ivory);color:var(--ink);}
+.sec-dark .sub{color:var(--ivory-dim);}
+.sec-light .sub{color:var(--ink-dim);}
+.sec-dark .hr{border-top:1px solid var(--line-d);}
+.sec-light .hr{border-top:1px solid var(--line-l);}
+
+.eyebrow{font-family:var(--font-body);font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;font-weight:600;display:inline-flex;align-items:center;gap:12px;}
+.sec-dark .eyebrow{color:var(--gold-bright);}
+.sec-light .eyebrow{color:var(--gold-deep);}
+.eyebrow::before{content:"";width:30px;height:1px;background:currentColor;display:inline-block;}
+.lede{font-size:1.1rem;max-width:640px;}
+
+.btn{
+  position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:16px 34px;border-radius:2px;font-family:var(--font-body);
+  font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;cursor:pointer;
+  text-decoration:none;transition:color .35s ease;z-index:0;
+}
+.btn::before{content:"";position:absolute;inset:0;transform:scaleX(0);transform-origin:left;transition:transform .45s cubic-bezier(.16,1,.3,1);z-index:-1;}
+.btn:hover::before{transform:scaleX(1);}
+.btn-primary{border:1px solid var(--gold);color:var(--gold-bright);}
+.btn-primary::before{background:var(--gold);}
+.btn-primary:hover{color:var(--black);}
+.sec-light .btn-primary{color:var(--gold-deep);}
+.sec-light .btn-primary:hover{color:var(--black);}
+.btn-ghost{border:1px solid currentColor;opacity:.85;}
+.btn-ghost::before{background:currentColor;opacity:.08;}
+.btn-ghost:hover{opacity:1;}
+
+.scroll-progress{position:fixed;top:0;left:0;height:2px;background:var(--gold);width:0%;z-index:70;}
+
+@keyframes riseIn{from{opacity:0;transform:translateY(34px);}to{opacity:1;transform:translateY(0);}}
+.hero-copy>*{animation:riseIn .9s cubic-bezier(.16,1,.3,1) both;}
+.hero-copy>*:nth-child(1){animation-delay:0s;}
+.hero-copy>*:nth-child(2){animation-delay:.1s;}
+.hero-copy>*:nth-child(3){animation-delay:.2s;}
+.hero-copy>*:nth-child(4){animation-delay:.3s;}
+.hero-copy>*:nth-child(5){animation-delay:.4s;}
+.hero .hero-visual{animation:riseIn 1.1s cubic-bezier(.16,1,.3,1) both;animation-delay:.15s;}
+
+.reveal{opacity:1;transform:none;}
+.reveal.prep{opacity:0;transform:translateY(30px);}
+.reveal{transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);}
+
+@media (prefers-reduced-motion:reduce){
+  .hero-copy>*,.hero .hero-visual{animation:none!important;opacity:1!important;transform:none!important;}
+  .reveal.prep{opacity:1!important;transform:none!important;}
+  .marquee-track{animation:none!important;}
+}
+
+/* cursor */
+.cursor-dot{
+  position:fixed;top:0;left:0;width:9px;height:9px;border:1.5px solid var(--gold-bright);
+  background:transparent;pointer-events:none;z-index:999;
+  transform:translate(-999px,-999px) rotate(45deg);mix-blend-mode:difference;
+  transition:width .25s cubic-bezier(.16,1,.3,1),height .25s cubic-bezier(.16,1,.3,1),opacity .2s ease,background .25s ease;
+  opacity:0;
+}
+.cursor-dot.active{opacity:1;}
+.cursor-dot.hover{width:15px;height:15px;background:var(--gold-bright);}
+html.custom-cursor,html.custom-cursor a,html.custom-cursor button,html.custom-cursor input,html.custom-cursor summary{cursor:none;}
+
+/* marquee */
+.marquee{overflow:hidden;padding-block:16px;border-top:1px solid var(--line-d);border-bottom:1px solid var(--line-d);}
+.marquee-track{display:flex;width:max-content;animation:marquee 26s linear infinite;}
+.marquee-track span{font-family:var(--font-display);font-style:italic;font-weight:400;font-size:1.15rem;color:var(--gold-bright);white-space:nowrap;padding-right:56px;}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* nav */
+header.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:rgba(10,9,7,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-d);}
+.nav-inner{max-width:1220px;margin:0 auto;padding:18px clamp(20px,5vw,64px);display:flex;align-items:center;justify-content:space-between;gap:20px;}
+.wordmark{font-family:var(--font-display);font-style:italic;letter-spacing:.02em;font-size:1.15rem;text-decoration:none;white-space:nowrap;color:var(--ivory);flex:0 0 auto;}
+.nav-links{display:none;list-style:none;margin:0;padding:0;align-items:center;flex-wrap:nowrap;}
+.nav-links li{display:flex;align-items:center;white-space:nowrap;}
+.nav-links li:not(:last-child)::after{content:"";width:3px;height:3px;border-radius:50%;background:var(--gold-deep);margin:0 14px;flex:0 0 auto;}
+.nav-links a{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--ivory-dim);transition:color .15s ease;padding-bottom:4px;border-bottom:1px solid transparent;}
+.nav-links a:hover{color:var(--gold-bright);border-bottom-color:var(--gold-bright);}
+.nav-cta{display:none;}
+@media (min-width:1080px){.nav-links{display:flex;}.nav-cta{display:inline-flex;padding:12px 22px;flex:0 0 auto;overflow:visible;}}
+
+.nav-toggle{display:inline-flex;flex-direction:column;justify-content:center;gap:5px;width:28px;height:22px;background:none;border:none;cursor:pointer;padding:0;flex:0 0 auto;}
+.nav-toggle span{display:block;height:1px;background:var(--ivory);width:100%;transition:transform .3s ease,opacity .3s ease;}
+.nav-toggle.open span:nth-child(1){transform:translateY(6px) rotate(45deg);}
+.nav-toggle.open span:nth-child(2){opacity:0;}
+.nav-toggle.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+@media (min-width:1080px){.nav-toggle{display:none;}}
+
+.mobile-nav{
+  position:fixed;inset:0;z-index:39;background:var(--black);
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:24px;
+  padding:32px clamp(20px,8vw,64px);
+  transform:translateY(-100%);opacity:0;transition:transform .45s cubic-bezier(.16,1,.3,1),opacity .3s ease;
+}
+.mobile-nav.open{transform:translateY(0);opacity:1;}
+.mobile-nav a{font-family:var(--font-display);font-style:italic;font-size:2rem;color:var(--ivory);text-decoration:none;}
+.mobile-nav a:hover{color:var(--gold-bright);}
+.mobile-nav .btn{margin-top:14px;}
+@media (min-width:1080px){.mobile-nav{display:none;}}
+
+/* hero */
+.hero{position:relative;padding-top:clamp(56px,9vw,96px);}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr;gap:44px;}}
+.hero-copy{display:flex;flex-direction:column;gap:26px;}
+.specs{display:flex;flex-wrap:wrap;gap:20px;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ivory-dim);}
+.specs b{color:var(--gold-bright);font-weight:600;}
+.hero-actions{display:flex;flex-wrap:wrap;gap:16px;margin-top:4px;}
+
+/* before/after slider (shared) */
+.ba-frame{position:relative;aspect-ratio:3/4;overflow:hidden;border:1px solid var(--line-d);cursor:ew-resize;background:var(--black-2);}
+.ba-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;pointer-events:none;-webkit-user-drag:none;user-drag:none;-webkit-touch-callout:none;}
+.ba-frame .after-wrap{position:absolute;inset:0;overflow:hidden;clip-path:inset(0 50% 0 0);}
+.ba-handle{position:absolute;top:0;bottom:0;width:1px;background:var(--gold-bright);left:50%;}
+.ba-handle::after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;border:1px solid var(--gold-bright);background:rgba(10,9,7,.55);}
+.ba-handle::before{content:"⟷";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.85rem;color:var(--gold-bright);z-index:2;}
+.ba-range{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:ew-resize;}
+.ba-label{position:absolute;bottom:12px;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ivory);}
+.ba-label.before{left:14px;}
+.ba-label.after{right:14px;}
+.ba-tag{position:absolute;top:12px;left:14px;z-index:3;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-bright);}
+.ba-caption{margin-top:14px;font-size:.85rem;color:var(--ivory-dim);}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:56px;}
+@media (max-width:800px){.steps{grid-template-columns:1fr;}}
+.step{border-top:1px solid var(--line-d);padding-top:20px;display:flex;flex-direction:column;gap:12px;}
+.step-num{font-family:var(--font-display);font-style:italic;font-size:2.8rem;color:var(--gold);line-height:1;}
+.step p{color:var(--ivory-dim);font-size:.95rem;}
+
+/* two col spec list */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:56px;}
+@media (max-width:820px){.two-col{grid-template-columns:1fr;}}
+.spec-list{list-style:none;margin:24px 0 0;padding:0;}
+.spec-list li{padding:16px 0;border-top:1px solid var(--line-d);font-size:.98rem;}
+.note{margin-top:22px;font-size:.85rem;color:var(--ivory-dim);}
+
+/* specialist */
+.spec-split{display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:center;margin-top:48px;}
+@media (max-width:820px){.spec-split{grid-template-columns:1fr;}}
+.spec-photo-frame{aspect-ratio:3/4;overflow:hidden;border:1px solid var(--line-l);}
+.spec-photo-frame img{width:100%;height:100%;object-fit:cover;object-position:50% 20%;}
+.cert-row{display:flex;gap:14px;margin-top:26px;flex-wrap:wrap;}
+.cert-slot{flex:1 1 140px;min-height:88px;border:1px dashed var(--line-l);display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font-size:.76rem;color:var(--ink-dim);letter-spacing:.04em;}
+
+/* pricing list */
+.price-list{margin-top:48px;}
+.price-row{display:flex;justify-content:space-between;align-items:baseline;padding:22px 0;border-top:1px solid var(--line-d);}
+.price-row:last-of-type{border-bottom:1px solid var(--line-d);}
+.price-row .name{font-size:1.05rem;}
+.price-row .amount{font-family:var(--font-display);font-style:italic;font-size:1.6rem;color:var(--gold-deep);white-space:nowrap;}
+
+/* guarantees numbered list */
+.g-list{display:grid;grid-template-columns:1fr 1fr;gap:0 56px;margin-top:48px;}
+@media (max-width:700px){.g-list{grid-template-columns:1fr;}}
+.g-item{display:flex;gap:20px;padding:24px 0;border-top:1px solid var(--line-l);}
+.g-item .gnum{font-family:var(--font-display);font-style:italic;font-size:1.6rem;color:var(--gold-deep);flex:0 0 auto;}
+.g-item p{color:var(--ink-dim);margin-top:6px;font-size:.92rem;}
+
+/* reviews */
+.rev-list{display:flex;flex-direction:column;gap:0;margin-top:24px;}
+.rev-item{padding:26px 0;border-top:1px solid var(--line-l);}
+.rev-quote{font-family:var(--font-display);font-style:italic;font-size:1.15rem;line-height:1.5;}
+.rev-name{display:block;margin-top:12px;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim);}
+.demo-note{margin-top:20px;font-size:.8rem;color:var(--ink-dim);}
+
+/* faq */
+details{border-top:1px solid var(--line-d);padding:22px 0;}
+details:last-child{border-bottom:1px solid var(--line-d);}
+summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;font-family:var(--font-display);font-size:1.2rem;}
+summary::-webkit-details-marker{display:none;}
+summary .plus{font-size:1.5rem;color:var(--gold-bright);transition:transform .25s ease;flex:0 0 auto;font-family:var(--font-body);font-weight:300;}
+details[open] summary .plus{transform:rotate(45deg);}
+details p{margin-top:16px;color:var(--ivory-dim);font-size:.95rem;max-width:640px;}
+
+/* booking */
+.book-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;margin-top:48px;align-items:start;}
+@media (max-width:860px){.book-grid{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:8px;margin-bottom:26px;}
+.field label{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);}
+.field input,.field textarea{
+  font-family:var(--font-body);font-size:1.05rem;padding:10px 2px;border-radius:0;
+  border:none;border-bottom:1px solid var(--line-l);background:transparent;color:var(--ink);
+}
+.field input:focus,.field textarea:focus{outline:none;border-bottom-color:var(--gold-deep);}
+.field-error{font-size:.76rem;color:#A3311A;min-height:1em;}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:.82rem;color:var(--ink-dim);margin-top:6px;}
+.consent input{margin-top:3px;}
+.book-side{padding-top:8px;}
+.book-side ul{margin-top:18px;padding:0;list-style:none;}
+.book-side li{padding:14px 0;border-top:1px solid var(--line-l);font-size:.95rem;}
+
+/* contacts */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:48px;}
+@media (max-width:860px){.contact-grid{grid-template-columns:1fr;}}
+.map-placeholder{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  aspect-ratio:4/3;text-decoration:none;color:var(--ivory);border:1px solid var(--line-d);
+  transition:border-color .2s ease;
+}
+.map-placeholder:hover{border-color:var(--gold);}
+.map-pin{color:var(--gold-bright);}
+.map-addr{font-family:var(--font-display);font-style:italic;font-size:1.2rem;}
+.map-link{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ivory-dim);}
+.contact-line{display:flex;gap:12px;padding:16px 0;border-top:1px solid var(--line-d);font-size:.98rem;}
+.contact-line span:first-child{color:var(--ivory-dim);flex:0 0 130px;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;padding-top:2px;}
+.soc-row{display:flex;gap:22px;margin-top:24px;}
+.soc-pill{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ivory-dim);}
+.soc-pill.active{color:var(--gold-bright);}
+
+footer{padding-block:44px;}
+.foot-inner{display:flex;flex-direction:column;gap:10px;font-size:.76rem;color:var(--ivory-dim);}
+
+@media (max-width:640px){
+  .sticky-cta{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;display:flex;}
+  .sticky-cta .btn{width:100%;background:var(--black);}
+}
+@media (min-width:641px){.sticky-cta{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="wordmark">Марина Руслановна</a>
+    <ul class="nav-links">
+      <li><a href="#procedure">Процедура</a></li>
+      <li><a href="#specialist">Специалист</a></li>
+      <li><a href="#before-after">До / после</a></li>
+      <li><a href="#pricing">Цены</a></li>
+      <li><a href="#faq">Вопросы</a></li>
+      <li><a href="#contacts">Контакты</a></li>
+    </ul>
+    <a href="#booking" class="btn btn-primary nav-cta">Записаться</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Меню" aria-expanded="false"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<nav class="mobile-nav" id="mobileNav">
+  <a href="#procedure">Процедура</a>
+  <a href="#specialist">Специалист</a>
+  <a href="#before-after">До / после</a>
+  <a href="#pricing">Цены</a>
+  <a href="#faq">Вопросы</a>
+  <a href="#contacts">Контакты</a>
+  <a href="#booking" class="btn btn-primary">Записаться</a>
+</nav>
+
+<main id="top">
+
+<section class="hero sec-dark">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">Камуфляж растяжек и рубцов · Ижевск</span>
+      <h1>Растяжки и рубцы можно закрыть — а не только прятать под одеждой</h1>
+      <p class="lede sub">Аппаратное введение пигмента точно под тон вашей кожи. Для тех, кто устал каждое утро маскировать шрамы автозагаром и консилером.</p>
+      <div class="specs">
+        <span>от <b>6 000 ₽</b> / час</span>
+        <span><b>60–120 мин</b> сеанс</span>
+        <span>заживление <b>5–7 дней</b></span>
+      </div>
+      <div class="hero-actions">
+        <a href="#booking" class="btn btn-primary">Записаться на консультацию</a>
+        <a href="#procedure" class="btn btn-ghost">Как проходит процедура</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="ba-frame" style="aspect-ratio:4/5;">
+        <span class="ba-tag">двигайте, чтобы увидеть результат</span>
+        <img src="images/before-1.jpg" alt="До камуфляжа растяжек, зона бедра" loading="eager" draggable="false">
+        <div class="after-wrap" data-after>
+          <img src="images/after-1.jpg" alt="После камуфляжа растяжек, зона бедра" loading="eager" draggable="false">
+        </div>
+        <span class="ba-label before">до</span>
+        <span class="ba-label after">после</span>
+        <div class="ba-handle" data-handle style="left:50%;"></div>
+        <input type="range" class="ba-range" min="0" max="100" value="50" aria-label="Сравнение до и после, зона бедра" data-ba-input>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee sec-dark" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Камуфляж растяжек</span><span>Камуфляж рубцов</span><span>Камуфляж шрамов</span><span>Ижевск</span><span>Запись открыта</span>
+    <span>Камуфляж растяжек</span><span>Камуфляж рубцов</span><span>Камуфляж шрамов</span><span>Ижевск</span><span>Запись открыта</span>
+  </div>
+</div>
+
+<section id="procedure" class="sec-light">
+  <div class="wrap">
+    <span class="eyebrow">Как это работает</span>
+    <h2 style="margin-top:18px;">Процедура похожа на перманентный макияж — только пигмент ложится на растяжку или рубец</h2>
+    <p class="lede sub" style="margin-top:18px;">В верхний слой кожи (около 1 мм) аппаратом с тончайшей иглой вводится гипоаллергенный пигмент, подобранный точно под ваш тон. Растяжка или рубец визуально сливаются с окружающей кожей. Ощущения сравнимы с перманентным макияжем бровей — используется охлаждающий анестетик, большинство клиенток переносят сеанс спокойно.</p>
+    <div class="steps">
+      <div class="step reveal prep">
+        <span class="step-num">01</span>
+        <h3>Консультация и подбор пигмента</h3>
+        <p>Оцениваем зону, подбираем оттенок под ваш тон кожи, делаем тест на реакцию.</p>
+      </div>
+      <div class="step reveal prep">
+        <span class="step-num">02</span>
+        <h3>Сеанс — 60–120 минут</h3>
+        <p>Длительность зависит от площади зоны. С анестезией и перерывами по необходимости.</p>
+      </div>
+      <div class="step reveal prep">
+        <span class="step-num">03</span>
+        <h3>Повтор через 4–6 недель</h3>
+        <p>Пигмент приживается постепенно. Обычно нужно от 1 до 3 сеансов — определяется на консультации.</p>
+      </div>
+    </div>
+    <p class="note">Первый эффект виден после заживления, на 5–7 день. Финальный результат — после всех сеансов и стабилизации пигмента, обычно в течение 1–2 месяцев.</p>
+  </div>
+</section>
+
+<section class="sec-dark">
+  <div class="wrap two-col">
+    <div class="reveal prep">
+      <span class="eyebrow">Кому подходит</span>
+      <h2 style="margin-top:18px;">Показания</h2>
+      <ul class="spec-list">
+        <li>Белые (атрофические) растяжки</li>
+        <li>Посттравматические и постоперационные рубцы</li>
+        <li>Светлые шрамы</li>
+        <li>Гипо- и гиперпигментация после травм</li>
+      </ul>
+    </div>
+    <div class="reveal prep">
+      <span class="eyebrow">Когда нельзя</span>
+      <h2 style="margin-top:18px;">Противопоказания</h2>
+      <ul class="spec-list">
+        <li>Растяжка или рубец младше 6–12 месяцев — кожа должна полностью зажить и стабилизироваться</li>
+        <li>Келоидные и незрелые рубцы — рассматриваются индивидуально</li>
+        <li>Беременность и период лактации</li>
+        <li>Декомпенсированный сахарный диабет, нарушения свёртываемости крови</li>
+        <li>Склонность к аллергии на пигменты — обязателен предварительный тест</li>
+        <li>Острые воспаления и повреждения кожи в зоне работы</li>
+      </ul>
+      <p class="note">Точные показания и противопоказания уточняются на консультации.</p>
+    </div>
+  </div>
+</section>
+
+<section id="specialist" class="sec-light">
+  <div class="wrap">
+    <span class="eyebrow">Специалист</span>
+    <h2 style="margin-top:18px;">Кто проводит процедуру</h2>
+    <div class="spec-split reveal prep">
+      <div class="spec-photo-frame">
+        <img src="images/marina.jpg" alt="Марина Руслановна" loading="lazy">
+      </div>
+      <div>
+        <h3 style="font-size:1.7rem;">Марина Руслановна</h3>
+        <p class="sub" style="margin-top:8px;">Специалист по эстетической дермопигментации</p>
+        <p class="sub" style="margin-top:18px;">Работает с камуфляжем растяжек, рубцов и шрамов: подбирает пигмент медицинского класса под тон кожи и соблюдает протокол стерильности на каждом этапе — от консультации до заживления.</p>
+        <div class="cert-row">
+          <div class="cert-slot">Место под сертификат</div>
+          <div class="cert-slot">Место под сертификат</div>
+          <div class="cert-slot">Место под диплом</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="before-after" class="sec-dark">
+  <div class="wrap">
+    <span class="eyebrow">Результаты</span>
+    <h2 style="margin-top:18px;">До и после</h2>
+    <p class="lede sub" style="margin-top:18px;">Потяните за границу на фото, чтобы увидеть разницу.</p>
+    <div class="steps" style="margin-top:48px;">
+      <div class="ba-item reveal prep">
+        <div class="ba-frame">
+          <span class="ba-tag">пример работы</span>
+          <img src="images/before-1.jpg" alt="До камуфляжа растяжек, зона бедра" loading="lazy" draggable="false">
+          <div class="after-wrap" data-after>
+            <img src="images/after-1.jpg" alt="После камуфляжа растяжек, зона бедра" loading="lazy" draggable="false">
+          </div>
+          <span class="ba-label before">до</span>
+          <span class="ba-label after">после</span>
+          <div class="ba-handle" data-handle style="left:50%;"></div>
+          <input type="range" class="ba-range" min="0" max="100" value="50" aria-label="Сравнение до и после, зона бедра" data-ba-input>
+        </div>
+        <p class="ba-caption">Зона бедра</p>
+      </div>
+      <div class="ba-item reveal prep">
+        <div class="ba-frame">
+          <span class="ba-tag">пример работы</span>
+          <img src="images/before-2.jpg" alt="До камуфляжа растяжек, зона голени" loading="lazy" draggable="false">
+          <div class="after-wrap" data-after>
+            <img src="images/after-2.jpg" alt="После камуфляжа растяжек, зона голени" loading="lazy" draggable="false">
+          </div>
+          <span class="ba-label before">до</span>
+          <span class="ba-label after">после</span>
+          <div class="ba-handle" data-handle style="left:50%;"></div>
+          <input type="range" class="ba-range" min="0" max="100" value="50" aria-label="Сравнение до и после, зона голени" data-ba-input>
+        </div>
+        <p class="ba-caption">Зона голени</p>
+      </div>
+      <div class="ba-item reveal prep">
+        <div class="ba-frame">
+          <span class="ba-tag">пример работы</span>
+          <img src="images/before-3.jpg" alt="До камуфляжа растяжек, зона бедра" loading="lazy" draggable="false">
+          <div class="after-wrap" data-after>
+            <img src="images/after-3.jpg" alt="После камуфляжа растяжек, зона бедра" loading="lazy" draggable="false">
+          </div>
+          <span class="ba-label before">до</span>
+          <span class="ba-label after">после</span>
+          <div class="ba-handle" data-handle style="left:50%;"></div>
+          <input type="range" class="ba-range" min="0" max="100" value="50" aria-label="Сравнение до и после, зона бедра" data-ba-input>
+        </div>
+        <p class="ba-caption">Зона бедра</p>
+      </div>
+    </div>
+    <p class="demo-note sub">Фото временные (для макета) — перед запуском заменим на реальные работы Марины.</p>
+  </div>
+</section>
+
+<section id="pricing" class="sec-light">
+  <div class="wrap">
+    <span class="eyebrow">Стоимость</span>
+    <h2 style="margin-top:18px;">Цены</h2>
+    <div class="price-list">
+      <div class="price-row"><span class="name">Камуфляж растяжек</span><span class="amount">от 6 000 ₽ / час</span></div>
+      <div class="price-row"><span class="name">Камуфляж рубцов</span><span class="amount">от 6 000 ₽ / час</span></div>
+      <div class="price-row"><span class="name">Камуфляж шрамов</span><span class="amount">от 6 000 ₽ / час</span></div>
+    </div>
+    <p class="note">Итоговая стоимость зависит от площади зоны и количества сеансов — определяется на консультации.</p>
+    <a href="https://t.me/razdensya18" id="photo-consult" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-top:28px;">Бесплатная консультация по фото</a>
+  </div>
+</section>
+
+<section class="sec-dark">
+  <div class="wrap">
+    <span class="eyebrow">Почему можно доверять</span>
+    <h2 style="margin-top:18px;">Гарантии</h2>
+    <div class="g-list">
+      <div class="g-item reveal prep"><span class="gnum">01</span><div><h3 style="font-size:1.1rem;">Стерильность</h3><p>Одноразовые иглы и расходники на каждую клиентку — без исключений.</p></div></div>
+      <div class="g-item reveal prep"><span class="gnum">02</span><div><h3 style="font-size:1.1rem;">Проверенные пигменты</h3><p>Сертифицированные пигменты медицинского класса, тест на реакцию перед сеансом.</p></div></div>
+      <div class="g-item reveal prep"><span class="gnum">03</span><div><h3 style="font-size:1.1rem;">Фиксированная цена</h3><p>Стоимость согласовывается на консультации и не меняется в процессе работы.</p></div></div>
+      <div class="g-item reveal prep"><span class="gnum">04</span><div><h3 style="font-size:1.1rem;">Индивидуальный подбор</h3><p>Оттенок пигмента подбирается под ваш тон кожи, а не берётся «усреднённым».</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-light">
+  <div class="wrap two-col">
+    <div>
+      <span class="eyebrow">После сеанса</span>
+      <h2 style="margin-top:18px;">Уход и восстановление</h2>
+      <ul class="spec-list">
+        <li>Не мочить обработанную зону первые 24 часа</li>
+        <li>Не посещать баню, сауну и бассейн 2 недели</li>
+        <li>Использовать восстанавливающий крем, который порекомендует мастер</li>
+        <li>Избегать прямого солнца и не загорать зону 3–4 недели</li>
+        <li>Не отрывать корочки самостоятельно — дать коже зажить естественно</li>
+        <li>При любых вопросах в период заживления — писать мастеру напрямую</li>
+      </ul>
+    </div>
+    <div id="reviews">
+      <span class="eyebrow">Отзывы</span>
+      <h2 style="margin-top:18px;">Что говорят клиентки</h2>
+      <div class="rev-list">
+        <div class="rev-item reveal prep">
+          <p class="rev-quote">«Растяжки после родов маскировала годами. После двух сеансов перестала стесняться платьев без плотных колготок»</p>
+          <span class="rev-name">Ольга, 29 лет</span>
+        </div>
+        <div class="rev-item reveal prep">
+          <p class="rev-quote">«Было страшно перед первым сеансом, но ощущения оказались вполне терпимыми, а результат заметен уже через неделю»</p>
+          <span class="rev-name">Алина</span>
+        </div>
+      </div>
+      <p class="demo-note">Отзывы демонстрационные — заменим на реальные после первых клиенток.</p>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="sec-dark">
+  <div class="wrap" style="max-width:820px;">
+    <span class="eyebrow">Вопросы</span>
+    <h2 style="margin-top:18px;">Частые вопросы</h2>
+    <div class="reveal prep" style="margin-top:32px;">
+      <details>
+        <summary>Это больно? <span class="plus">+</span></summary>
+        <p>Ощущения сравнимы с перманентным макияжем бровей. Перед сеансом наносится охлаждающий анестетик, большинство клиенток переносят процедуру спокойно.</p>
+      </details>
+      <details>
+        <summary>Сколько нужно сеансов? <span class="plus">+</span></summary>
+        <p>Чаще всего от 1 до 3, с перерывом 4–6 недель между ними. Точное количество зависит от площади и особенностей кожи — определяется на консультации.</p>
+      </details>
+      <details>
+        <summary>Когда будет виден результат? <span class="plus">+</span></summary>
+        <p>Первый эффект — после заживления, на 5–7 день. Финальный результат — после всех сеансов и стабилизации пигмента, обычно через 1–2 месяца.</p>
+      </details>
+      <details>
+        <summary>Растяжки или рубцы вернутся обратно? <span class="plus">+</span></summary>
+        <p>Нет, сам дефект кожи камуфляж не убирает — он маскирует его цветом. Пигмент может постепенно светлеть со временем, тогда можно сделать коррекцию.</p>
+      </details>
+      <details>
+        <summary>Есть противопоказания? <span class="plus">+</span></summary>
+        <p>Да, подробный список — в разделе «Противопоказания» выше. Главное условие — растяжка или рубец должны быть полностью зажившими (от 6–12 месяцев).</p>
+      </details>
+      <details>
+        <summary>Как подготовиться к сеансу? <span class="plus">+</span></summary>
+        <p>Особая подготовка не нужна — детали подскажем на консультации в зависимости от зоны и состояния кожи.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="booking" class="sec-light">
+  <div class="wrap">
+    <span class="eyebrow">Запись</span>
+    <h2 style="margin-top:18px;">Записаться на консультацию</h2>
+    <p class="lede sub" style="margin-top:18px;">Заполните форму — заявка откроется в Telegram, и мы согласуем удобное время.</p>
+    <div class="book-grid">
+      <div class="reveal prep">
+        <div class="field">
+          <label for="f-name">Как к вам обращаться</label>
+          <input id="f-name" type="text" placeholder="Имя и фамилия" autocomplete="name">
+          <span class="field-error" id="err-name"></span>
+        </div>
+        <div class="field">
+          <label for="f-phone">Телефон</label>
+          <input id="f-phone" type="tel" placeholder="+7 900 000-00-00" autocomplete="tel">
+          <span class="field-error" id="err-phone"></span>
+        </div>
+        <div class="field">
+          <label for="f-date">Желаемая дата</label>
+          <input id="f-date" type="date">
+          <span class="field-error" id="err-date"></span>
+        </div>
+        <div class="field">
+          <label for="f-comment">Комментарий (необязательно)</label>
+          <textarea id="f-comment" rows="3" placeholder="Зона, вопросы — что угодно"></textarea>
+        </div>
+        <label class="consent">
+          <input type="checkbox" id="f-consent">
+          <span>Даю согласие на обработку персональных данных в соответствии с 152-ФЗ</span>
+        </label>
+        <span class="field-error" id="err-consent"></span>
+        <button class="btn btn-primary" id="f-submit" style="margin-top:22px;width:100%;">Записаться</button>
+      </div>
+      <div class="book-side reveal prep">
+        <h3>Что дальше</h3>
+        <ul>
+          <li>Заявка откроется в Telegram уже с вашими данными</li>
+          <li>Мы согласуем удобное время и ответим на вопросы</li>
+          <li>Точную стоимость и число сеансов обсудим на консультации</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contacts" class="sec-dark">
+  <div class="wrap">
+    <span class="eyebrow">Контакты</span>
+    <h2 style="margin-top:18px;">Где нас найти</h2>
+    <div class="contact-grid">
+      <div class="reveal prep">
+        <div class="contact-line"><span>Город</span><span>Ижевск</span></div>
+        <div class="contact-line"><span>Адрес</span><span>ул. Берша, 43 (уточняется)</span></div>
+        <div class="contact-line"><span>Часы работы</span><span>уточняются</span></div>
+        <div class="contact-line"><span>Telegram</span><span><a href="https://t.me/razdensya18" style="color:var(--gold-bright);text-decoration:none;">@razdensya18</a></span></div>
+        <div class="soc-row">
+          <span class="soc-pill active">Telegram</span>
+          <span class="soc-pill">Instagram — скоро</span>
+          <span class="soc-pill">VK — скоро</span>
+        </div>
+      </div>
+      <a class="map-placeholder reveal prep" href="https://yandex.ru/maps/?text=Ижевск%2C%20улица%20Берша%2C%2043" target="_blank" rel="noopener">
+        <svg class="map-pin" width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22s7-7.58 7-12.5A7 7 0 0 0 5 9.5C5 14.42 12 22 12 22Z" stroke="currentColor" stroke-width="1.3"/><circle cx="12" cy="9.5" r="2.4" stroke="currentColor" stroke-width="1.3"/></svg>
+        <span class="map-addr">Ижевск, ул. Берша, 43</span>
+        <span class="map-link">Открыть на Яндекс.Картах ↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="sec-dark">
+  <div class="wrap foot-inner">
+    <p>© 2026 Марина Руслановна. Камуфляж растяжек, рубцов и шрамов в Ижевске.</p>
+    <p>ИП [ФИО] · ИНН — · ОГРНИП — (реквизиты появятся после регистрации)</p>
+    <p>Нажимая «Записаться», вы соглашаетесь на обработку персональных данных в соответствии с 152-ФЗ.</p>
+  </div>
+</footer>
+
+<div class="sticky-cta"><a href="#booking" class="btn btn-primary">Записаться</a></div>
+
+<script>
+(function(){
+  var toggle=document.getElementById('navToggle');
+  var panel=document.getElementById('mobileNav');
+  if(!toggle||!panel)return;
+  function closeMenu(){
+    toggle.classList.remove('open');panel.classList.remove('open');
+    toggle.setAttribute('aria-expanded','false');document.body.style.overflow='';
+  }
+  toggle.addEventListener('click',function(){
+    var isOpen=panel.classList.toggle('open');
+    toggle.classList.toggle('open',isOpen);
+    toggle.setAttribute('aria-expanded',isOpen?'true':'false');
+    document.body.style.overflow=isOpen?'hidden':'';
+  });
+  panel.querySelectorAll('a').forEach(function(a){a.addEventListener('click',closeMenu);});
+})();
+
+(function(){
+  document.querySelectorAll('.ba-frame').forEach(function(frame){
+    var input=frame.querySelector('[data-ba-input]');
+    var after=frame.querySelector('[data-after]');
+    var handle=frame.querySelector('[data-handle]');
+    function update(v){
+      after.style.clipPath='inset(0 '+(100-v)+'% 0 0)';
+      handle.style.left=v+'%';
+    }
+    input.addEventListener('input',function(){update(input.value);});
+    update(input.value);
+  });
+})();
+
+(function(){
+  var bar=document.getElementById('scrollProgress');
+  function onScroll(){
+    var h=document.documentElement;
+    var scrolled=h.scrollTop;
+    var max=h.scrollHeight-h.clientHeight;
+    var pct=max>0?(scrolled/max)*100:0;
+    bar.style.width=pct+'%';
+  }
+  document.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+})();
+
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.remove('prep');io.unobserve(e.target);}
+      });
+    },{threshold:.01,rootMargin:'0px 0px 200px 0px'});
+    els.forEach(function(el){
+      var r=el.getBoundingClientRect();
+      if(r.top>window.innerHeight*0.9){el.classList.add('prep');io.observe(el);}
+    });
+  }
+  setTimeout(function(){
+    els.forEach(function(el){el.classList.remove('prep');});
+  },2500);
+})();
+
+(function(){
+  if(!window.matchMedia('(pointer:fine)').matches)return;
+  var dot=document.getElementById('cursorDot');
+  document.documentElement.classList.add('custom-cursor');
+  function disableCursor(){
+    document.documentElement.classList.remove('custom-cursor');
+    dot.classList.remove('active');
+    dot.style.display='none';
+  }
+  document.addEventListener('touchstart',disableCursor,{once:true,passive:true});
+  document.addEventListener('mousemove',function(e){
+    dot.style.transform='translate('+e.clientX+'px,'+e.clientY+'px) translate(-50%,-50%) rotate(45deg)';
+    dot.classList.add('active');
+  });
+  document.addEventListener('mouseleave',function(){dot.classList.remove('active');});
+  document.querySelectorAll('a,button,input,textarea,summary').forEach(function(el){
+    el.addEventListener('mouseenter',function(){dot.classList.add('hover');});
+    el.addEventListener('mouseleave',function(){dot.classList.remove('hover');});
+  });
+})();
+
+(function(){
+  var pc=document.getElementById('photo-consult');
+  if(pc){
+    pc.href='https://t.me/razdensya18?text='+encodeURIComponent('Добрый день! Интересна процедура камуфляжа — подскажите, пожалуйста, можно ли оценить возможность по фото?');
+  }
+})();
+
+(function(){
+  var submit=document.getElementById('f-submit');
+  submit.addEventListener('click',function(){
+    var name=document.getElementById('f-name').value.trim();
+    var phone=document.getElementById('f-phone').value.trim();
+    var date=document.getElementById('f-date').value;
+    var comment=document.getElementById('f-comment').value.trim();
+    var consent=document.getElementById('f-consent').checked;
+    var ok=true;
+
+    var errName=document.getElementById('err-name');
+    var errPhone=document.getElementById('err-phone');
+    var errDate=document.getElementById('err-date');
+    var errConsent=document.getElementById('err-consent');
+    errName.textContent='';errPhone.textContent='';errDate.textContent='';errConsent.textContent='';
+
+    if(!name){errName.textContent='Укажите имя';ok=false;}
+    var phoneDigits=phone.replace(/\D/g,'');
+    if(phoneDigits.length<10){errPhone.textContent='Проверьте номер телефона';ok=false;}
+    if(!date){errDate.textContent='Выберите дату';ok=false;}
+    if(!consent){errConsent.textContent='Нужно согласие на обработку данных';ok=false;}
+    if(!ok)return;
+
+    var lines=['Заявка с сайта','Имя: '+name,'Телефон: '+phone,'Желаемая дата: '+date];
+    if(comment){lines.push('Комментарий: '+comment);}
+    var text=encodeURIComponent(lines.join('\n'));
+    window.location.href='https://t.me/razdensya18?text='+text;
+  });
+})();
+</script>
+</body>
+</html>
