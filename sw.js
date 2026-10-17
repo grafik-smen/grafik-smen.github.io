@@ -1,6 +1,6 @@
 // Офлайн-кэш для PWA.
 // HTML — network-first (чтобы новые версии подхватывались сразу), остальное — cache-first.
-const CACHE = 'shift-cal-v2';
+const CACHE = 'shift-cal-v3';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -8,8 +8,9 @@ self.addEventListener('install', e => {
 });
 
 self.addEventListener('activate', e => {
+  // удаляем только старые кэши календаря: у учёта (uchet-*) свой кэш на этом же адресе
   e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('shift-cal-') && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -17,6 +18,9 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const req = e.request;
+  // учёт (/uchet/) и сайт (/site/) живут на этом же адресе — их страницы календарь не трогает
+  const path = new URL(req.url).pathname;
+  if (new URL(req.url).origin === location.origin && (path.startsWith('/uchet/') || path.startsWith('/site/'))) return;
   const isHTML = req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
 
   if (isHTML) {
