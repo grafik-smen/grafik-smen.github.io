@@ -1,5 +1,5 @@
 // Офлайн-кэш учёта. Версия меняется при каждой сборке — iPad подхватывает новую страницу сам.
-const CACHE = 'uchet-4d3e1ef8b3';
+const CACHE = 'uchet-6a169edc80';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

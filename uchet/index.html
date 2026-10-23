@@ -110,6 +110,9 @@
   .banner a{color:var(--gold);font-weight:700;overflow-wrap:anywhere;}
 
   main{padding-top:8px;}
+  /* экран вкладки и календарь въезжают сбоку — на iPhone страница не должна от этого уезжать вбок */
+  main{overflow-x:clip;}
+  @supports not (overflow:clip){ main{overflow-x:hidden;} }
   .view{display:grid;gap:22px;}
 
   /* ---------- общие ---------- */
@@ -1114,7 +1117,7 @@
         '<a href="'+LIVE_URL+'" target="_blank" rel="noopener">'+LIVE_URL.replace('https://','')+'</a>';
     } else if (inSafariTab()){
       b.hidden = false;
-      b.innerHTML = '<b>Открыто во вкладке Safari.</b> Нажми «Поделиться» → «Показать больше» → «На экран „Домой“» → «Добавить» и работай только с иконки: у иконки и у вкладки данные разные.';
+      b.innerHTML = '<b>Открыто во вкладке Safari.</b> Нажми «Поделиться» → «Показать больше» → «На экран „Домой“» → «Добавить» и работай только с иконки: у иконки и у вкладки данные разные.';
     } else b.hidden = true;
     if (S.dbState==='wait' || (S.dbState==='on' && !ready())){
       $('v-'+S.tab).innerHTML = '<div class="group"><div class="empty">Загружаю учёт…</div></div>';
